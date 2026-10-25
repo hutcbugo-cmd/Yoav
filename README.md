@@ -58,6 +58,7 @@ speakers, read speech, 1.5 s pauses between), against the reference text:
 | Model | Word error rate | Speed (4 CPU cores) |
 |---|---|---|
 | `ivrit-ai/whisper-large-v3-turbo-ct2` (default) | 19.8% | ~0.85× real time |
+| `ivrit-ai/whisper-large-v3-ct2` (`--model`) | 19.8% | ~2× slower |
 
 Every sentence was transcribed, word timestamps were monotonic and none fell
 outside real speech. Part of the error rate is spelling variants the
