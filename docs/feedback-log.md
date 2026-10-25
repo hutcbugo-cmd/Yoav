@@ -24,3 +24,14 @@ pipeline (not just in one video). "Status" says whether a fix is implemented
   ("נוי נאט" → "לא יודעת").
 - In scripted ads, the interviewer's coaching ("עוד פעם", "תגיד ככה…") and the
   first takes before it are production material, never content.
+
+## Round 2 — client notes on the Stage A analysis
+
+| # | Note | Planned pipeline change | Status |
+|---|---|---|---|
+| 1 | Must have rhythmic music — find a source | Music track + ducking under dialogue; source decided with client (music sites blocked from sandbox) | Waiting on source |
+| 2 | Cuts must be fast; drop her repeating the question ("להגיד מי נראה הכי טוב?") — "זריז, קליל, לא לופי" | Tight gaps (pause ≤ 0.15 s), never keep an interviewee echo of the question | Planned (Stage B EDL) |
+| 3 | One consistent subtitle position, not yellow | Single position, colour preset (#183D32 accent) | Planned (Stage C) |
+| 4 | Chunkier font | Assistant ExtraBold (800) static instance, OFL — downloaded | Asset ready |
+| 5 | Less headroom | Face tracking (YuNet, MIT) — measured: head top at 29 %, eyes at 36 % of frame height; she sways 26–66 % horizontally | Model ready, crop logic planned |
+| 6 | SFX + pop-ups for rhythm / virality | Intentional SFX + text/emoji pop-ups tied to story beats | Planned (Stage B marks, Stage C preview) |
