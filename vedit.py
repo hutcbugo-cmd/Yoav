@@ -374,7 +374,8 @@ def main():
     r = sub.add_parser("render"); common(r)
     al = sub.add_parser("all"); common(al)
     for sp in (t, al):
-        sp.add_argument("--model", default="large-v3", help="faster-whisper model name or local dir")
+        sp.add_argument("--model", default="ivrit-ai/whisper-large-v3-turbo-ct2",
+                        help="faster-whisper model: HF repo id (Hebrew fine-tune by default), name like large-v3, or local dir")
         sp.add_argument("--language", default="he")
         sp.add_argument("--compute-type", default="int8")
     for sp in (an, al):
