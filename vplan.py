@@ -557,7 +557,9 @@ def main():
         mix.append(f"[fx{k}]")
         n_in += 1
     graph.append(f"{''.join(mix)}amix=inputs={len(mix)}:normalize=0:duration=first,"
-                 f"loudnorm=I={st.get('lufs', -14)}:TP=-1.5:LRA=11,aresample=48000[aout]")
+                 f"loudnorm=I={st.get('lufs', -14)}:TP=-1.5:LRA=11,aresample=48000,"
+                 # loudnorm alone let a Nomi render peak at 0.0 dBFS; a final limiter holds -1.5 dBFS
+                 f"alimiter=limit=0.84:attack=2:release=50:level=false[aout]")
     gpath = os.path.join(work, "plan_filter.txt")
     with open(gpath, "w", encoding="utf-8") as f:
         f.write(";\n".join(graph))

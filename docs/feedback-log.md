@@ -149,3 +149,4 @@ Plan: `examples/plan_nomi.example.json`.
   drop, flash and pop-up were 0.18 s early in v1 → synced to the measured onset in both versions.
   Rule: sync music drops / flashes to the audio onset of the word, not the ASR start time.
   Punch-ins capped at ~1.6× total magnification (1.72× visibly softened 1080p).
+- Round 10c: hook-2 render peaked at 0.0 dBFS despite loudnorm TP=-1.5 → final alimiter at -1.5 dBFS in every render.
