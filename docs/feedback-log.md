@@ -57,3 +57,26 @@ Rules learned:
 - Never cut exactly on ASR word boundaries; snap to the audio.
 - Mixkit asset pages: titles follow their audio URL in the HTML.
 - Render time for a 30 s 1080×1920 edit with all effects: ~1 min 10 s on 4 cores.
+
+## Round 4 — v3 after studying two reference ads (combined style, no English line)
+
+Client: "80%" on v2; asked to learn from two reference ads, combine both styles, no translation line.
+Analysis: `docs/style-references.md`. Changes, all in `vplan.py` (plan: `examples/plan_v3.example.json`):
+
+| Reference finding | Change | Status |
+|---|---|---|
+| Captions have no box; hard switch; no word highlight | `caption_mode: "clean"`: white + soft shadow, 1–3 words, hard switch | Done |
+| Vibe 2 colour-codes speakers | interviewer white, interviewee mint neon with blurred green glow (`clip.speaker`) | Done |
+| v2 framing too tight (face 24–30 % of height vs 16 %) | `base_zoom 1.08`, `face_top 0.22` — head, chest and hands visible | Done |
+| 60–71 % of reference cuts change size > 15 % | takes split into contiguous sub-shots alternating 1.08 / 1.35 (25 % change); joins keep audio continuous (no snap, no fade, one gain per take) | Done |
+| 19–41 % of shots slowly push in | `drift` 4 % per shot | Done |
+| Music near speech level | gain −11 dB, ducking ratio 3 | Done |
+| Product sticker, white flash | watch cut-out (GrabCut + flat-background cleanup) as `image` pop-ups; `flashes` | Done |
+| Story: build tension before the product | added "למה דווקא הבחור עם השעון דירגת הכי גבוה?" / "לא יודעת, נראה הכי טוב" before the price question; ends on her line | Done |
+
+Found in QC and fixed in the pipeline:
+- Glow pop-ups at 30 % height covered her eyes after the wider framing → pop-ups above the head (11.5 %), big sticker beside her.
+- Video trims whole frames, audio exact samples → lip sync drifted up to 46 ms over 25 shots → cuts now chosen only among frame boundaries (quietest one) → drift 0.07 ms.
+- Cut quality: median level at cuts −10.4 dB vs speech; 9/30 cuts still near speech level (words run together / street noise) — 40 ms fades.
+
+Open: the product photo's dial reads "poedagar" while the ad says L&P — client to confirm.

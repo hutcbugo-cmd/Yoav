@@ -61,8 +61,78 @@ def clip_face(faces, s, e):
 
 
 # ---------------------------------------------------------------- pop-up images
-def render_popup(text, emoji, path, style, W):
-    """Rounded accent box with Hebrew text (RTL via raqm) and an optional colour emoji."""
+def render_popup(pu, path, style, W, H):
+    """kind "box": accent box with text + emoji; "glow": neon text with a coloured
+    glow and no box; "image": product sticker (PNG with alpha), height as a fraction of H."""
+    kind = pu.get("kind", "box")
+    if kind == "image":
+        return render_sticker(pu, path, H)
+    if kind == "glow":
+        return render_glow(pu, path, style, W)
+    return render_box(pu.get("text", ""), pu.get("emoji", ""), path, style, W)
+
+
+def hex_rgb(c):
+    c = c.lstrip("#")
+    return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def render_sticker(pu, path, H):
+    from PIL import Image, ImageFilter
+    im = Image.open(pu["image"]).convert("RGBA")
+    h = round(H * pu.get("height", 0.3))
+    im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
+    if pu.get("rotate"):
+        im = im.rotate(pu["rotate"], resample=Image.BICUBIC, expand=True)
+    pad = 30
+    out = Image.new("RGBA", (im.width + 2 * pad, im.height + 2 * pad), (0, 0, 0, 0))
+    sh = Image.new("RGBA", out.size, (0, 0, 0, 0))
+    sh.paste((0, 0, 0, 110), (pad + 8, pad + 14), im.split()[3])  # soft drop shadow
+    out.alpha_composite(sh.filter(ImageFilter.GaussianBlur(12)))
+    out.alpha_composite(im, (pad, pad))
+    out.save(path)
+    return out.size
+
+
+def render_glow(pu, path, style, W):
+    from PIL import Image, ImageDraw, ImageFilter, ImageFont
+    size = round(W * pu.get("size", style.get("popup_size", 0.085)))
+    font = ImageFont.truetype(style["font_file"], size)
+    text = pu["text"]
+    l, t, r, b = font.getbbox(text, direction="rtl", features=["-liga"])
+    pad = round(size * 0.6)
+    cw, ch = r - l + 2 * pad, b - t + 2 * pad
+    em = None
+    if pu.get("emoji"):
+        ef = ImageFont.truetype(EMOJI_FONT, 109)
+        em = Image.new("RGBA", (140 * len(pu["emoji"]), 128), (0, 0, 0, 0))
+        ImageDraw.Draw(em).text((0, 0), pu["emoji"], font=ef, embedded_color=True)
+        em = em.crop(em.getbbox())
+        em = em.resize((round(em.width * size * 1.05 / em.height), round(size * 1.05)), Image.LANCZOS)
+        cw += em.width + round(size * 0.2)
+    fill = hex_rgb(pu.get("color", style.get("glow_text", "#FFFFFF")))
+    glow = hex_rgb(pu.get("glow", style.get("glow_color", "#1ED37A")))
+    x0 = pad + (em.width + round(size * 0.2) if em else 0)
+
+    def layer(colour, alpha=255):
+        im = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+        ImageDraw.Draw(im).text((x0 - l, pad - t), text, font=font, fill=colour + (alpha,), direction="rtl",
+                                features=["-liga"])
+        return im
+    out = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
+    shadow = layer((0, 0, 0), 150).filter(ImageFilter.GaussianBlur(size * 0.08))
+    out.alpha_composite(shadow, (0, round(size * 0.05)))
+    g = layer(glow).filter(ImageFilter.GaussianBlur(size * 0.16))
+    for _ in range(3):  # stack the blur for a dense neon halo
+        out.alpha_composite(g)
+    out.alpha_composite(layer(fill))
+    if em:
+        out.alpha_composite(em, (pad, (ch - em.height) // 2))
+    out.save(path)
+    return out.size
+
+
+def render_box(text, emoji, path, style, W):
     from PIL import Image, ImageDraw, ImageFont
     size = round(W * style.get("popup_size", 0.085))
     font = ImageFont.truetype(style["font_file"], size)
@@ -121,6 +191,18 @@ Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    clean_mode = st.get("caption_mode", "boxed") == "clean"
+    if clean_mode:
+        # no box, hard switch, colour by speaker: interviewer white + soft shadow,
+        # interviewee neon text with a blurred glow (reference "vibe 2" colour code)
+        ink = hex_to_ass(st.get("interviewee_text", "#C8FFE0"))
+        halo = hex_to_ass(st.get("interviewee_glow", "#1ED37A"), 0x30)
+        head = head.replace(
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,100,0,0,3,{round(fs * 0.22)},0,5,80,80,0,-1",
+            f"Style: CapI,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H70000000,&H80000000,0,0,0,0,100,100,0,0,1,"
+            f"{max(2, round(fs * 0.05))},{max(1, round(fs * 0.04))},5,80,80,0,-1\n"
+            f"Style: CapA,{st['font']},{fs},{ink},{ink},{halo},&H80000000,0,0,0,0,100,100,0,0,1,"
+            f"{max(3, round(fs * 0.09))},{max(1, round(fs * 0.04))},5,80,80,0,-1")
     lines = []
     for ci, words in enumerate(words_by_clip):
         chunks, cur = [], []
@@ -140,6 +222,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             else:
                 chunks.append(cur)
         clip_end = offsets[ci] + plan["clips"][ci]["e"] - plan["clips"][ci]["s"]
+        if clean_mode:
+            sty = "CapA" if plan["clips"][ci].get("speaker") == "interviewee" else "CapI"
+            blur = r"{\blur6}" if sty == "CapA" else r"{\blur3}"
+            for k, c in enumerate(chunks):
+                end = chunks[k + 1][0]["s"] if k + 1 < len(chunks) else clip_end
+                txt = " ".join(x["w"].strip(".,").replace("{", "").replace("}", "") for x in c)
+                if end - c[0]["s"] >= 0.02:
+                    lines.append(f"Dialogue: 0,{vedit.ass_time(c[0]['s'])},{vedit.ass_time(end)},{sty},,0,0,0,,"
+                                 f"{{\\an5\\pos({W // 2},{y})}}{blur}{txt}")
+            continue
         for k, c in enumerate(chunks):
             start = c[0]["s"]
             end = chunks[k + 1][0]["s"] if k + 1 < len(chunks) else clip_end
@@ -185,9 +277,22 @@ def main():
     allw = [w for s in tr["segments"] for w in s["words"]]
     clips = plan["clips"]
     audio = vedit_audio(os.path.join(work, "audio16k.wav"))
+    # a clip whose start equals the previous clip's end is a sub-shot of the same take
+    # (size change mid-sentence): its join keeps the audio continuous - no snap, no fade
+    for a_, b_ in zip(clips, clips[1:]):
+        b_["joined"] = abs(b_["s"] - a_["e"]) < 1e-3
     if plan.get("snap_cuts", True):
-        for c in clips:
-            snap_clip(c, allw, audio)
+        for k, c in enumerate(clips):
+            nxt_joined = k + 1 < len(clips) and clips[k + 1].get("joined")
+            snap_clip(c, allw, audio, meta["fps"], start=not c.get("joined"), end=not nxt_joined)
+        for a_, b_ in zip(clips, clips[1:]):
+            if b_.get("joined"):
+                b_["s"] = a_["e"]
+    # put every cut on a frame boundary: video trims whole frames while audio trims exact
+    # samples, so off-grid cuts drifted lip sync by up to ~46 ms over 25 shots
+    fps = meta["fps"]
+    for c in clips:
+        c["s"], c["e"] = round(round(c["s"] * fps) / fps, 4), round(round(c["e"] * fps) / fps, 4)
     with open(os.path.join(work, "plan_resolved.json"), "w", encoding="utf-8") as f:
         json.dump(plan, f, ensure_ascii=False, indent=1)
     offsets, acc = [], 0.0
@@ -221,9 +326,10 @@ def main():
         z0 = base * c.get("zoom", 1.0)
         z1 = base * c.get("punch_zoom", c.get("zoom", 1.0))
         tp = (c["punch_at"] - c["s"]) if "punch_at" in c else 0.0
-        if z1 != z0:
+        drift = c.get("drift", plan.get("framing", {}).get("drift", 0.0))
+        if z1 != z0 or drift:
             prog = f"min(max((t-{tp:.3f})/0.12,0),1)"
-            z = f"({z0:.4f}+({z1 - z0:.4f})*(3*pow({prog},2)-2*pow({prog},3)))"
+            z = f"({z0:.4f}+({z1 - z0:.4f})*(3*pow({prog},2)-2*pow({prog},3)))*(1+{drift:.4f}*t/{d:.3f})"
             scale = f"scale=w='2*trunc({W}*{z}/2)':h='2*trunc({H}*{z}/2)':eval=frame:flags=bicubic"
         else:
             scale = f"scale={2 * round(W * z0 / 2)}:{2 * round(H * z0 / 2)}:flags=bicubic"
@@ -233,16 +339,24 @@ def main():
         vparts.append(f"[0:v]trim=start={c['s']:.3f}:end={c['e']:.3f},setpts=PTS-STARTPTS,{scale},"
                       f"crop={W}:{H}:x='{x}':y='{y}',setsar=1,fps={meta['fps']:.5f}[v{i}]")
         # level each clip's dialogue to a common RMS so interviewer / interviewee match
-        seg = audio[int(c["s"] * 16000):int(c["e"] * 16000)]
+        g0 = i  # level the whole take (run of joined sub-shots) with one gain, so joins stay seamless
+        while g0 > 0 and clips[g0].get("joined"):
+            g0 -= 1
+        g1 = i
+        while g1 + 1 < len(clips) and clips[g1 + 1].get("joined"):
+            g1 += 1
+        seg = audio[int(clips[g0]["s"] * 16000):int(clips[g1]["e"] * 16000)]
         rms = 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-9)
         gain = float(np.clip(st.get("dialog_rms", -20) - rms, -6, 9))
         # 15 ms fades on clean cuts; 40 ms where the cut had to land inside continuous speech
         def edge_fade(t):
             lvl = 20 * np.log10(np.sqrt(np.mean(audio[int(t * 16000) - 160:int(t * 16000) + 160] ** 2)) + 1e-9)
             return min(0.04 if lvl > rms - 12 else 0.015, d / 4)
-        fi, fo = edge_fade(c["s"]), edge_fade(c["e"])
-        aparts.append(f"[0:a]atrim=start={c['s']:.3f}:end={c['e']:.3f},asetpts=PTS-STARTPTS,volume={gain:.2f}dB,"
-                      f"afade=t=in:d={fi:.3f},afade=t=out:st={d - fo:.3f}:d={fo:.3f}[a{i}]")
+        fi = 0.0 if c.get("joined") else edge_fade(c["s"])
+        fo = 0.0 if (i + 1 < len(clips) and clips[i + 1].get("joined")) else edge_fade(c["e"])
+        aparts.append(f"[0:a]atrim=start={c['s']:.3f}:end={c['e']:.3f},asetpts=PTS-STARTPTS,volume={gain:.2f}dB"
+                      + (f",afade=t=in:d={fi:.3f}" if fi else "") + (f",afade=t=out:st={d - fo:.3f}:d={fo:.3f}" if fo else "")
+                      + f"[a{i}]")
         labels.append(f"[v{i}][a{i}]")
         # framing check: is the face fully inside the crop at the tightest zoom?
         zt = max(z0, z1)
@@ -266,7 +380,7 @@ def main():
     n_in = 1
     for k, pu in enumerate(plan.get("popups", [])):
         png = os.path.join(work, f"popup_{k}.png")
-        pw, ph = render_popup(pu.get("text", ""), pu.get("emoji", ""), png, st, W)
+        pw, ph = render_popup(pu, png, st, W, H)
         pw, ph = 2 * round(pw * 1.13 / 2), 2 * round(ph * 1.13 / 2)  # room for the overshoot
         t0 = out_t(pu["at"])
         dur = pu.get("dur", 1.2)
@@ -278,11 +392,20 @@ def main():
                      f"pad=w={pw}:h={ph}:x='(ow-iw)/2':y='(oh-ih)/2':eval=frame:color=0x00000000,"
                      f"fade=t=out:st={dur - 0.12:.3f}:d=0.12:alpha=1,setpts=PTS+{t0:.3f}/TB[p{k}]")
         py = round(H * pu.get("y", st.get("popup_y", 0.53)))
-        graph.append(f"[{vlast}][p{k}]overlay=x='(W-w)/2':y='{py}-h/2':eof_action=pass:"
+        px = f"{round(W * pu['x'])}-w/2" if "x" in pu else "(W-w)/2"
+        graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2':eof_action=pass:"
                      f"enable='between(t,{t0:.3f},{t0 + dur:.3f})'[vp{k}]")
         vlast = f"vp{k}"
         n_in += 1
 
+    for k, fl in enumerate(plan.get("flashes", [])):
+        t0, dur = out_t(fl["at"]), fl.get("dur", 0.32)
+        graph.append(f"color=c=white:s={W}x{H}:d={dur:.3f}:r={meta['fps']:.5f},format=rgba,"
+                     f"fade=t=in:st=0:d=0.05:alpha=1,fade=t=out:st=0.06:d={dur - 0.06:.3f}:alpha=1,"
+                     f"setpts=PTS+{max(0, t0 - 0.05):.3f}/TB[fl{k}]")
+        graph.append(f"[{vlast}][fl{k}]overlay=eof_action=pass:enable='between(t,{max(0, t0 - 0.05):.3f},"
+                     f"{t0 - 0.05 + dur:.3f})'[vf{k}]")
+        vlast = f"vf{k}"
     # dialogue clean-up
     graph.append("[dia]highpass=f=80,afftdn=nf=-30,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,"
                   "asplit=2[diam][diak]")
@@ -315,7 +438,8 @@ def main():
             mlabels.append(f"[mm{j}]")
         graph.append(f"{''.join(mlabels)}amix=inputs={len(mlabels)}:normalize=0:duration=longest,"
                      f"apad=whole_dur={total:.3f}[mus]")
-        graph.append("[mus][diak]sidechaincompress=threshold=0.03:ratio=6:attack=15:release=350:makeup=1[mduck]")
+        graph.append(f"[mus][diak]sidechaincompress=threshold={mu.get('duck_threshold', 0.03)}:"
+                     f"ratio={mu.get('duck_ratio', 6)}:attack=15:release=350:makeup=1[mduck]")
         mix.append("[mduck]")
     # sound effects, aligned on their loudest point (impacts) or their start
     for k, fx in enumerate(plan.get("sfx", [])):
@@ -355,7 +479,7 @@ def main():
     print(f"wrote {a.output}")
 
 
-def snap_clip(c, words, audio, sr=16000):
+def snap_clip(c, words, audio, fps, sr=16000, start=True, end=True):
     """Move each cut to the quietest 10 ms between the kept word and its neighbour.
     Whisper word times drift 50-100 ms; cutting on them left fragments of the
     neighbouring word ("כלומר" -> "ר") or clipped onsets ("ש" of "שתים")."""
@@ -369,14 +493,18 @@ def snap_clip(c, words, audio, sr=16000):
     env = np.sqrt(np.convolve(audio ** 2, np.ones(hop) / hop, "same"))
 
     def quietest(lo, hi):
-        i0, i1 = max(0, int(lo * sr)), min(len(env) - 1, int(hi * sr))
-        if i1 <= i0:
-            return (lo + hi) / 2
-        return (i0 + int(np.argmin(env[i0:i1:hop // 2])) * (hop // 2)) / sr
+        # candidates are frame boundaries only, so the cut is both quiet and frame-exact
+        ts = np.arange(np.ceil(lo * fps), np.floor(hi * fps) + 1) / fps
+        if len(ts) == 0:
+            return round((lo + hi) / 2 * fps) / fps
+        lv = [env[min(len(env) - 1, max(0, int(t * sr)))] for t in ts]
+        return float(ts[int(np.argmin(lv))])
 
     c["s_orig"], c["e_orig"] = c["s"], c["e"]
-    c["s"] = round(quietest(max(prev_e - 0.03, first["s"] - 0.25), first["s"] + 0.04), 3)
-    c["e"] = round(quietest(last["e"] - 0.04, min(next_s + 0.03, last["e"] + 0.25)), 3)
+    if start:
+        c["s"] = round(quietest(max(prev_e - 0.03, first["s"] - 0.25), first["s"] + 0.04), 4)
+    if end:
+        c["e"] = round(quietest(last["e"] - 0.04, min(next_s + 0.03, last["e"] + 0.25)), 4)
 
 
 def vedit_audio(path):

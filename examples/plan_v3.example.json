@@ -1,0 +1,438 @@
+{
+ "source": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/raw.mp4",
+ "work": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/work",
+ "sfx_dir": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/sfx",
+ "style": {
+  "font": "Assistant ExtraBold",
+  "font_file": "/home/user/Yoav/assets/fonts/Assistant-800.ttf",
+  "caption_mode": "clean",
+  "caption_y": 0.6,
+  "caption_size": 0.074,
+  "interviewee_text": "#C8FFE0",
+  "interviewee_glow": "#1ED37A",
+  "accent": "#183D32",
+  "popup_size": 0.1,
+  "popup_y": 0.4,
+  "glow_color": "#1ED37A",
+  "lufs": -14,
+  "dialog_rms": -20
+ },
+ "framing": {
+  "base_zoom": 1.08,
+  "face_top": 0.22
+ },
+ "clips": [
+  {
+   "s": 60.36,
+   "e": 61.17,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "HOOK: מי לדעתך מכניס הכי הרבה כסף?"
+  },
+  {
+   "s": 61.17,
+   "e": 62.42,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "HOOK: מי לדעתך מכניס הכי הרבה כסף?"
+  },
+  {
+   "s": 67.85,
+   "e": 68.33,
+   "speaker": "interviewee",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "ארבע"
+  },
+  {
+   "s": 71.95,
+   "e": 72.61,
+   "speaker": "interviewee",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "יש לו שעון כזה שנראה..."
+  },
+  {
+   "s": 72.61,
+   "e": 74.2,
+   "speaker": "interviewee",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "יש לו שעון כזה שנראה..."
+  },
+  {
+   "s": 74.48,
+   "e": 75.34,
+   "speaker": "interviewee",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "יוקרתי."
+  },
+  {
+   "s": 46.8,
+   "e": 48.24,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "למה דווקא הבחור עם השעון דירגת הכי גבוה?"
+  },
+  {
+   "s": 48.24,
+   "e": 49.26,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "למה דווקא הבחור עם השעון דירגת הכי גבוה?"
+  },
+  {
+   "s": 52.15,
+   "e": 53.41,
+   "speaker": "interviewee",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "לא יודעת, נראה הכי טוב"
+  },
+  {
+   "s": 53.41,
+   "e": 54.4,
+   "speaker": "interviewee",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "לא יודעת, נראה הכי טוב"
+  },
+  {
+   "s": 77.11,
+   "e": 79.19,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "כמה לדעתך השעון הזה עולה?"
+  },
+  {
+   "s": 82.25,
+   "e": 83.57,
+   "speaker": "interviewee",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "שתים עשרה אלף.",
+   "punch_at": 82.3,
+   "punch_zoom": 1.4
+  },
+  {
+   "s": 84.01,
+   "e": 85.11,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "וואלה, הלכת רחוק."
+  },
+  {
+   "s": 86.16,
+   "e": 87.79,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "REVEAL: השעון הזה עולה רק 500 שקל, והוא ממותג השעונים L&P"
+  },
+  {
+   "s": 87.79,
+   "e": 88.71,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "REVEAL: השעון הזה עולה רק 500 שקל, והוא ממותג השעונים L&P"
+  },
+  {
+   "s": 88.71,
+   "e": 90.32,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "REVEAL: השעון הזה עולה רק 500 שקל, והוא ממותג השעונים L&P"
+  },
+  {
+   "s": 98.09,
+   "e": 99.6,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "עשויים מפלדת אל-חלד, זכוכית ספיר ומנגנון יפני מדויק"
+  },
+  {
+   "s": 99.6,
+   "e": 100.54,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "עשויים מפלדת אל-חלד, זכוכית ספיר ומנגנון יפני מדויק"
+  },
+  {
+   "s": 100.54,
+   "e": 102.13,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "עשויים מפלדת אל-חלד, זכוכית ספיר ומנגנון יפני מדויק"
+  },
+  {
+   "s": 109.0,
+   "e": 111.45,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "L&P יצאו במבצע מטורף לקראת החגים של 1+1 מתנה"
+  },
+  {
+   "s": 111.45,
+   "e": 113.58,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "L&P יצאו במבצע מטורף לקראת החגים של 1+1 מתנה"
+  },
+  {
+   "s": 114.2,
+   "e": 116.16,
+   "speaker": "interviewer",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "שניים בחמש מאות שקל בלבד"
+  },
+  {
+   "s": 116.87,
+   "e": 118.61,
+   "speaker": "interviewer",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "CTA: תלחצו על הקישור פה למטה"
+  },
+  {
+   "s": 130.44,
+   "e": 131.51,
+   "speaker": "interviewee",
+   "zoom": 1.0,
+   "drift": 0.04,
+   "note": "CLOSER: עכשיו אני הולכת לקנות אחד לאבא שלי."
+  },
+  {
+   "s": 131.51,
+   "e": 132.5,
+   "speaker": "interviewee",
+   "zoom": 1.25,
+   "drift": 0.04,
+   "note": "CLOSER: עכשיו אני הולכת לקנות אחד לאבא שלי."
+  }
+ ],
+ "popups": [
+  {
+   "kind": "image",
+   "image": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/product/watch_sticker.png",
+   "at": 72.61,
+   "dur": 1.55,
+   "height": 0.22,
+   "x": 0.8,
+   "y": 0.38,
+   "rotate": -8
+  },
+  {
+   "kind": "glow",
+   "text": "12,000 ₪",
+   "emoji": "🤑",
+   "at": 82.32,
+   "dur": 1.2,
+   "glow": "#FF4FA3",
+   "color": "#FFE3F1",
+   "size": 0.11,
+   "y": 0.115
+  },
+  {
+   "kind": "glow",
+   "text": "רק 500 ₪",
+   "emoji": "😱",
+   "at": 87.79,
+   "dur": 0.9,
+   "size": 0.12,
+   "y": 0.115
+  },
+  {
+   "kind": "image",
+   "image": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/product/watch_sticker.png",
+   "at": 88.71,
+   "dur": 1.6,
+   "height": 0.26,
+   "y": 0.4,
+   "rotate": -8,
+   "x": 0.8
+  },
+  {
+   "kind": "glow",
+   "text": "1+1 מתנה",
+   "emoji": "🎁",
+   "at": 112.45,
+   "dur": 1.1,
+   "size": 0.1,
+   "y": 0.115
+  },
+  {
+   "kind": "glow",
+   "text": "2 ב-500 ₪",
+   "at": 114.27,
+   "dur": 1.85,
+   "size": 0.1,
+   "y": 0.115,
+   "glow": "#FF4FA3",
+   "color": "#FFE3F1"
+  },
+  {
+   "kind": "glow",
+   "text": "לינק למטה",
+   "emoji": "👇",
+   "at": 116.94,
+   "dur": 1.6,
+   "size": 0.1,
+   "y": 0.115
+  }
+ ],
+ "flashes": [
+  {
+   "at": 87.79,
+   "dur": 0.32
+  }
+ ],
+ "music": {
+  "file": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/m303.mp3",
+  "title": "Party — Arulo (Mixkit Stock Music Free License)",
+  "gain_db": -11,
+  "duck_ratio": 3,
+  "duck_threshold": 0.05,
+  "sections": [
+   {
+    "out_until": 82.25,
+    "track_start": 22.2,
+    "fade_out": 0.06
+   },
+   {
+    "out_from": 84.01,
+    "sync": {
+     "src": 87.79,
+     "track": 13.95
+    },
+    "fade_out": 1.0
+   }
+  ]
+ },
+ "sfx": [
+  {
+   "name": "pop2",
+   "at": 72.61,
+   "gain_db": -12,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  },
+  {
+   "name": "sparkle",
+   "at": 74.53,
+   "gain_db": -14,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.15
+  },
+  {
+   "name": "whoosh2",
+   "at": 46.8,
+   "gain_db": -20,
+   "dur": 0.7,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "riser",
+   "at": 82.25,
+   "gain_db": -14,
+   "dur": 2.1,
+   "align": "peak",
+   "lead": 1.8
+  },
+  {
+   "name": "impact",
+   "at": 82.3,
+   "gain_db": -9,
+   "dur": 1.6,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "whoosh2",
+   "at": 84.01,
+   "gain_db": -18,
+   "dur": 0.7,
+   "align": "peak",
+   "lead": 0.35
+  },
+  {
+   "name": "coin",
+   "at": 87.79,
+   "gain_db": -10,
+   "dur": 1.4,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "whoosh",
+   "at": 88.71,
+   "gain_db": -18,
+   "dur": 0.8,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "click",
+   "at": 99.6,
+   "gain_db": -18,
+   "dur": 0.3,
+   "align": "start"
+  },
+  {
+   "name": "click",
+   "at": 100.54,
+   "gain_db": -18,
+   "dur": 0.3,
+   "align": "start"
+  },
+  {
+   "name": "pop2",
+   "at": 112.45,
+   "gain_db": -12,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  },
+  {
+   "name": "money",
+   "at": 114.27,
+   "gain_db": -13,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "pop",
+   "at": 116.94,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "whoosh",
+   "at": 130.44,
+   "gain_db": -20,
+   "dur": 0.8,
+   "align": "peak",
+   "lead": 0.4
+  }
+ ]
+}
