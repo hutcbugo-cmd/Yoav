@@ -144,3 +144,8 @@ New in the pipeline, each found while building this edit:
 | Thick, large captions up to 2 lines | `cap_max_words`, `cap_max_chars`, `stroke`, `stroke_color`; pink fill #FF2E8B |
 Style for this brand: pink #FF2E8B pop-up boxes + caption fill, black stroke, 9.5 % caption size; music "Fashion" (Arulo, Mixkit), drop at 18.28 s synced to "Nomi". App section (lines 4–11): captions + zooms only, no pop-ups (client will add screen recordings).
 Plan: `examples/plan_nomi.example.json`.
+- Round 10b: hook 2 version (one take split into 5 joined shots by idea, 7 animated pop-ups on its keywords).
+  Found: Whisper put "Nomi" at 114.66 s, but the audio shows a 130 ms gap and the word starts at 114.84 —
+  drop, flash and pop-up were 0.18 s early in v1 → synced to the measured onset in both versions.
+  Rule: sync music drops / flashes to the audio onset of the word, not the ASR start time.
+  Punch-ins capped at ~1.6× total magnification (1.72× visibly softened 1080p).
