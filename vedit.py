@@ -119,6 +119,116 @@ def is_hallucination(seg):
     return dur < 0.15 or (seg.no_speech_prob > 0.8 and seg.avg_logprob < -1.0)
 
 
+# ---------------------------------------------------------------- diarize
+SPEAKER_MODEL = "Wespeaker/wespeaker-voxceleb-resnet34-LM"  # CC-BY-4.0, ONNX, ungated
+
+
+def utterances(tr):
+    """Split Whisper segments at sentence punctuation: one segment often holds
+    two speakers ("יובל. מה קורה?")."""
+    utts = []
+    for seg in tr["segments"]:
+        cur = []
+        for w in seg["words"]:
+            cur.append(w)
+            if w["w"].rstrip("\"'״").endswith((".", "?", "!")):
+                utts.append(cur)
+                cur = []
+        if cur:
+            utts.append(cur)
+    return utts
+
+
+def cmd_diarize(a):
+    """Two-speaker identification from voice: interviewer vs interviewee.
+    Embeds each utterance with a speaker-verification model, clusters into two
+    voices, and calls the voice that asks more questions the interviewer.
+    Writes "spk" / "spk_conf" onto every word in transcript.json."""
+    import glob
+    import wave
+    import numpy as np
+    import onnxruntime as ort
+    import kaldi_native_fbank as knf
+    from huggingface_hub import hf_hub_download
+    path = os.path.join(a.work, "transcript.json")
+    with open(path, encoding="utf-8") as f:
+        tr = json.load(f)
+    with wave.open(os.path.join(a.work, "audio16k.wav"), "rb") as f:
+        audio = np.frombuffer(f.readframes(f.getnframes()), np.int16).astype(np.float32)  # int16 scale, as trained
+    sess = ort.InferenceSession(hf_hub_download(SPEAKER_MODEL, "voxceleb_resnet34_LM.onnx"))
+
+    def embed(s, e):
+        o = knf.FbankOptions()
+        o.frame_opts.dither = 0
+        o.frame_opts.samp_freq = 16000
+        o.mel_opts.num_bins = 80
+        fb = knf.OnlineFbank(o)
+        fb.accept_waveform(16000, audio[int(s * 16000):int(e * 16000)].tolist())
+        fb.input_finished()
+        feats = np.array([fb.get_frame(i) for i in range(fb.num_frames_ready)], np.float32)
+        feats -= feats.mean(0)
+        v = sess.run(None, {"feats": feats[None]})[0][0]
+        return v / np.linalg.norm(v)
+
+    utts = utterances(tr)
+    spans = [(u[0]["s"], u[-1]["e"]) for u in utts]
+    spans = [(s - 0.1, e + 0.1) if e - s < 0.25 else (s, e) for s, e in spans]
+    E = np.array([embed(s, e) for s, e in spans])
+    dur = np.array([e - s for s, e in spans])
+    # 2-means on cosine, seeded with the two most dissimilar utterances longer than 1 s,
+    # duration-weighted so long, clean utterances define each voice
+    long_ = np.where(dur > 1.0)[0] if (dur > 1.0).sum() >= 2 else np.arange(len(utts))
+    sim = E[long_] @ E[long_].T
+    i, j = np.unravel_index(np.argmin(sim), sim.shape)
+    C = E[[long_[i], long_[j]]]
+    for _ in range(20):
+        lab = np.argmax(E @ C.T, 1)
+        C = np.array([(E[lab == k] * dur[lab == k, None]).sum(0) for k in (0, 1)])
+        C /= np.linalg.norm(C, axis=1, keepdims=True)
+    S = E @ C.T
+    margin = S[np.arange(len(utts)), lab] - S[np.arange(len(utts)), 1 - lab]
+    asks = [sum(1 for u, l in zip(utts, lab) if l == k and u[-1]["w"].endswith("?")) for k in (0, 1)]
+    interviewer = int(np.argmax(asks))
+    for u, l, m in zip(utts, lab, margin):
+        for w in u:
+            w["spk"] = "interviewer" if l == interviewer else "interviewee"
+            w["spk_conf"] = round(float(m), 2)
+    tr["diarization"] = {"model": SPEAKER_MODEL, "voice_similarity": round(float(C[0] @ C[1]), 3),
+                         "note": "spk_conf = cosine margin between the two voices; < 0.3 is uncertain"}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(tr, f, ensure_ascii=False, indent=1)
+    unsure = sum(1 for m in margin if m < 0.3)
+    print(f"speakers: {sum(lab == interviewer)} interviewer / {sum(lab != interviewer)} interviewee utterances, "
+          f"{unsure} uncertain; voice similarity {float(C[0] @ C[1]):.2f} (near 0 = clearly two voices)")
+
+
+def cmd_report(a):
+    """Timestamped transcript with speakers and confidence, for human review (Stage A)."""
+    with open(os.path.join(a.work, "transcript.json"), encoding="utf-8") as f:
+        tr = json.load(f)
+    review_path = a.review or os.path.join(a.work, "review.json")
+    if os.path.exists(review_path):
+        with open(review_path, encoding="utf-8") as f:
+            apply_review(tr, json.load(f))
+    rows = ["| זמן | דובר | טקסט | ביטחון |", "|---|---|---|---|"]
+    names = {"interviewer": "מראיין", "interviewee": "מרואיינת", None: "?"}
+    for u in utterances(tr):
+        spk, conf = u[0].get("spk"), u[0].get("spk_conf")
+        low = [w["w"] for w in u if w["p"] < 0.5]
+        flags = []
+        if conf is not None and conf < 0.3:
+            flags.append(f"דובר לא ודאי ({conf:.2f})")
+        if low:
+            flags.append("מילים לא ודאיות: " + ", ".join(low))
+        rows.append(f"| {u[0]['s']:.1f}–{u[-1]['e']:.1f} | {names.get(spk, '?')} | "
+                    f"{' '.join(w['w'] for w in u)} | {'; '.join(flags) or '✓'} |")
+    out = os.path.join(a.work, "report.md")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write("\n".join(rows) + "\n")
+    print("\n".join(rows))
+    print(f"\nwrote {out}")
+
+
 # ---------------------------------------------------------------- analyze
 def split_sentences(segments):
     """Re-split Whisper segments into sentences on . ? ! and long pauses."""
@@ -502,6 +612,9 @@ def main():
         sp.add_argument("--work", default="work")
 
     t = sub.add_parser("transcribe"); common(t)
+    dz = sub.add_parser("diarize", help="identify interviewer vs interviewee by voice"); common(dz)
+    rp = sub.add_parser("report", help="timestamped transcript with speakers for review"); common(rp)
+    rp.add_argument("--review")
     an = sub.add_parser("analyze"); common(an)
     r = sub.add_parser("render"); common(r)
     al = sub.add_parser("all"); common(al)
@@ -529,6 +642,10 @@ def main():
     a = p.parse_args()
     if a.cmd == "transcribe" or (a.cmd == "all" and not a.silence_only):
         cmd_transcribe(a)
+    if a.cmd == "diarize" or (a.cmd == "all" and not a.silence_only):
+        cmd_diarize(a)
+    if a.cmd == "report":
+        cmd_report(a)
     if a.cmd in ("analyze", "all"):
         cmd_analyze(a)
     if a.cmd in ("render", "all"):

@@ -30,6 +30,11 @@ Or copy a model directory in and pass `--model /path/to/model`.
 # 1. transcribe -> work/transcript.json
 python3 vedit.py transcribe interview.mp4
 
+# 1b. diarize -> who speaks each line (interviewer / interviewee), by voice
+python3 vedit.py diarize interview.mp4
+#     report -> work/report.md: timestamped transcript, speakers, uncertain lines
+python3 vedit.py report interview.mp4
+
 # 2. analyze -> work/edl.json   (prints detected Q/A, removed words, new duration)
 python3 vedit.py analyze interview.mp4
 
@@ -91,8 +96,9 @@ Fixed along the way:
 - A question removed with a retake still got a chapter → skipped.
 
 ## Known limits
-- Speakers aren't identified (the test footage is mono), so question/answer
-  labels come from wording; use `"question"` ranges in review.json for accuracy.
+- Speaker identification (`diarize`, Wespeaker ResNet34, CC-BY-4.0) assumes exactly
+  two voices and is tested on one video so far; utterances under ~0.5 s are often
+  uncertain (flagged in the report). `analyze` doesn't use speakers yet.
 - Transcription is ~2.5× real time when there are many short speech regions.
 - A misrecognised word can turn a statement into a question (the test turned
   "מים נשפכים…" into "מה משפחים…?"), so check the Q/A list `analyze` prints.
@@ -100,7 +106,5 @@ Fixed along the way:
 - Whisper tends to "clean up" speech, so some fillers and false starts never
   appear in the transcript and can't be cut; the prompt nudges it toward
   verbatim output but it's not guaranteed.
-- Q&A detection is text-based, not speaker-based: a question the interviewee
-  asks rhetorically will be labelled a question. Fix it in `edl.json`.
 - Zoom anchors on a fixed point (`--focus`), not a tracked face.
 - Rendering re-encodes with per-frame scaling: roughly real-time at 1080p on 4 CPU cores.
