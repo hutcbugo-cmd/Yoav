@@ -100,3 +100,10 @@ Rules (apply to every future edit):
 Clips, captions, music, framing identical to v2 (`examples/plan_v4.example.json`); cut points only moved to frame boundaries (lip-sync fix from round 4, 29.2 s → 29.5 s).
 Added: strike-through price card ("12,000 ₪" crossed in red → "רק 500 ₪ 😱", new `price` pop-up kind), white flash on "500", watch sticker beside her head on "שעון" and on "L&P", reaction emoji (💸 🤔 😂 🎁❤️), two quiet pops for the stickers.
 Open: client is not fully happy with the caption style in either version — needs direction (examples) before changing it.
+
+## Round 7 — v5 = v4 with the client's caption style
+
+Client direction: keep everything, same font and vibe, no green box; white text, each spoken word fills dark green (#183D32).
+New `caption_mode: "fill"`: white words with a thin dark outline; the spoken word gets the accent fill plus a white outline
+(dark green alone is unreadable on dark clothing). Same chunking, position and pop-in as v2. Plan: `examples/plan_v5.example.json`.
+Default caption style for StreetUP from now on: `fill` with the brand's dark accent.

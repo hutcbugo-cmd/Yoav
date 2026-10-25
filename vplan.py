@@ -236,7 +236,19 @@ Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-    clean_mode = st.get("caption_mode", "boxed") == "clean"
+    mode = st.get("caption_mode", "boxed")
+    clean_mode = mode == "clean"
+    if mode == "fill":
+        # no box: white words with a thin dark outline; the spoken word fills with the
+        # accent colour and gets a white outline so a dark fill stays readable on any background
+        ob = max(2, round(fs * 0.05))
+        head = head.replace(
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,100,0,0,3,{round(fs * 0.22)},0,5,80,80,0,-1",
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H40000000,&H80000000,0,0,0,0,100,100,0,0,1,"
+            f"{ob},{max(1, round(fs * 0.04))},5,80,80,0,-1")
+        fill = hex_to_ass(st.get("fill_color", st["accent"]))
+        hi_on = r"{\c" + fill + r"\3c&H00FFFFFF&\bord" + str(round(ob * 1.6)) + "}"
+        hi_off = r"{\c&H00FFFFFF&\3c&H40000000&\bord" + str(ob) + "}"
     if clean_mode:
         # no box, hard switch, colour by speaker: interviewer white + soft shadow,
         # interviewee neon text with a blurred glow (reference "vibe 2" colour code)
@@ -286,8 +298,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 e = c[i + 1]["s"] if i + 1 < len(c) else end
                 if e - s < 0.02:
                     continue
-                txt = " ".join((r"{\c" + hi + "}" + t + r"{\c&H00FFFFFF&}") if j == i else t
-                               for j, t in enumerate(clean))
+                if mode == "fill":
+                    txt = " ".join((hi_on + t + hi_off) if j == i else t for j, t in enumerate(clean))
+                else:
+                    txt = " ".join((r"{\c" + hi + "}" + t + r"{\c&H00FFFFFF&}") if j == i else t
+                                   for j, t in enumerate(clean))
                 pop = r"{\fscx88\fscy88\t(0,90,\fscx100\fscy100)}" if i == 0 else ""
                 lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(e)},Cap,,0,0,0,,"
                              f"{{\\an5\\pos({W // 2},{y})}}{pop}{txt}")
