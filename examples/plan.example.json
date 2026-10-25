@@ -1,0 +1,287 @@
+{
+ "source": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/raw.mp4",
+ "work": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/work",
+ "sfx_dir": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/sfx",
+ "style": {
+  "font": "Assistant ExtraBold",
+  "font_file": "/home/user/Yoav/assets/fonts/Assistant-800.ttf",
+  "accent": "#183D32",
+  "highlight": "#9EE6C1",
+  "caption_y": 0.7,
+  "caption_size": 0.076,
+  "popup_y": 0.53,
+  "popup_size": 0.085,
+  "lufs": -14,
+  "dialog_rms": -20
+ },
+ "framing": {
+  "base_zoom": 1.22,
+  "face_top": 0.13
+ },
+ "clips": [
+  {
+   "s": 60.36,
+   "e": 62.42,
+   "zoom": 1.0,
+   "note": "Q hook: מי לדעתך מכניס הכי הרבה כסף?"
+  },
+  {
+   "s": 67.85,
+   "e": 68.33,
+   "zoom": 1.12,
+   "note": "ארבע"
+  },
+  {
+   "s": 71.95,
+   "e": 74.2,
+   "zoom": 1.0,
+   "note": "יש לו שעון כזה שנראה..."
+  },
+  {
+   "s": 74.48,
+   "e": 75.34,
+   "zoom": 1.12,
+   "note": "יוקרתי."
+  },
+  {
+   "s": 77.11,
+   "e": 79.19,
+   "zoom": 1.0,
+   "note": "Q: כמה לדעתך השעון הזה עולה?"
+  },
+  {
+   "s": 82.25,
+   "e": 83.57,
+   "zoom": 1.08,
+   "note": "שתים עשרה אלף.",
+   "punch_at": 82.3,
+   "punch_zoom": 1.22
+  },
+  {
+   "s": 84.01,
+   "e": 85.11,
+   "zoom": 1.0,
+   "note": "וואלה, הלכת רחוק."
+  },
+  {
+   "s": 86.16,
+   "e": 90.32,
+   "zoom": 1.0,
+   "note": "השעון הזה עולה רק 500 שקל, והוא ממותג השעונים L&P",
+   "punch_at": 87.79,
+   "punch_zoom": 1.14
+  },
+  {
+   "s": 98.09,
+   "e": 102.13,
+   "zoom": 1.08,
+   "note": "עשויים מפלדת אל-חלד, זכוכית ספיר ומנגנון יפני מדויק"
+  },
+  {
+   "s": 109.0,
+   "e": 113.58,
+   "zoom": 1.0,
+   "note": "L&P יצאו במבצע מטורף לקראת החגים של 1+1 מתנה",
+   "punch_at": 112.45,
+   "punch_zoom": 1.12
+  },
+  {
+   "s": 114.2,
+   "e": 116.16,
+   "zoom": 1.08,
+   "note": "שניים בחמש מאות שקל בלבד"
+  },
+  {
+   "s": 130.44,
+   "e": 132.5,
+   "zoom": 1.0,
+   "note": "עכשיו אני הולכת לקנות אחד לאבא שלי.",
+   "punch_at": 131.95,
+   "punch_zoom": 1.1
+  },
+  {
+   "s": 116.87,
+   "e": 118.61,
+   "zoom": 1.0,
+   "note": "CTA: תלחצו על הקישור פה למטה"
+  }
+ ],
+ "popups": [
+  {
+   "at": 74.53,
+   "emoji": "⌚✨",
+   "dur": 0.8
+  },
+  {
+   "at": 82.32,
+   "text": "12,000 ₪",
+   "emoji": "🤑",
+   "dur": 1.2
+  },
+  {
+   "at": 87.79,
+   "text": "רק 500 ₪",
+   "emoji": "😱",
+   "dur": 2.4
+  },
+  {
+   "at": 98.64,
+   "text": "פלדת אל-חלד",
+   "dur": 0.94
+  },
+  {
+   "at": 99.6,
+   "text": "זכוכית ספיר",
+   "dur": 0.92
+  },
+  {
+   "at": 100.54,
+   "text": "מנגנון יפני",
+   "dur": 1.55
+  },
+  {
+   "at": 112.45,
+   "text": "1+1 מתנה",
+   "emoji": "🎁",
+   "dur": 1.1
+  },
+  {
+   "at": 114.27,
+   "text": "שניים ב-500 ₪",
+   "dur": 1.85
+  },
+  {
+   "at": 116.94,
+   "text": "לינק למטה",
+   "emoji": "👇",
+   "dur": 1.65
+  }
+ ],
+ "music": {
+  "file": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/m303.mp3",
+  "title": "Party — Arulo (Mixkit Stock Music Free License)",
+  "gain_db": -15,
+  "sections": [
+   {
+    "out_until": 82.25,
+    "track_start": 22.2,
+    "fade_out": 0.06,
+    "note": "groove under the hook, hard stop on the impact"
+   },
+   {
+    "out_from": 84.01,
+    "sync": {
+     "src": 87.79,
+     "track": 13.95
+    },
+    "fade_out": 1.2,
+    "note": "intro build, drop lands on '500'"
+   }
+  ]
+ },
+ "sfx": [
+  {
+   "name": "click",
+   "at": 67.85,
+   "gain_db": -14,
+   "dur": 0.4,
+   "align": "start"
+  },
+  {
+   "name": "sparkle",
+   "at": 74.53,
+   "gain_db": -12,
+   "dur": 1.2,
+   "align": "peak",
+   "lead": 0.15
+  },
+  {
+   "name": "riser",
+   "at": 82.25,
+   "gain_db": -14,
+   "dur": 2.1,
+   "align": "peak",
+   "lead": 1.8
+  },
+  {
+   "name": "impact",
+   "at": 82.3,
+   "gain_db": -9,
+   "dur": 1.6,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "whoosh2",
+   "at": 84.01,
+   "gain_db": -16,
+   "dur": 0.8,
+   "align": "peak",
+   "lead": 0.35
+  },
+  {
+   "name": "coin",
+   "at": 87.79,
+   "gain_db": -10,
+   "dur": 1.5,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "pop",
+   "at": 98.64,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "pop",
+   "at": 99.6,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "pop",
+   "at": 100.54,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "pop2",
+   "at": 112.45,
+   "gain_db": -12,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  },
+  {
+   "name": "money",
+   "at": 114.27,
+   "gain_db": -12,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "pop",
+   "at": 116.94,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "whoosh",
+   "at": 130.44,
+   "gain_db": -18,
+   "dur": 0.9,
+   "align": "peak",
+   "lead": 0.4
+  }
+ ]
+}

@@ -36,3 +36,24 @@ pipeline (not just in one video). "Status" says whether a fix is implemented
 | 5 | Less headroom | Face tracking (YuNet, MIT) — measured: head top at 29 %, eyes at 36 % of frame height; she sways 26–66 % horizontally | Model ready, crop logic planned |
 | 6 | SFX + pop-ups for rhythm / virality | Intentional SFX + text/emoji pop-ups tied to story beats | Planned (Stage B marks, Stage C preview) |
 | 7 | Brand is **L&P** (model heard "NLP" and "L&B") | `terms` glossary in review.json: every variant → canonical name, split tokens rejoined. faster-whisper `hotwords="L&P"` was tested first: fixed 1 of 2 mentions and misplaced it at the sentence end, so it is not used | Implemented, tested on this video |
+
+## Round 3 — render v2 (green light, Mixkit allowed): 2:13 → 29.2 s
+
+Implemented in `vplan.py` (renders an approved plan; reusable for the next video):
+- Ordered clips from the Stage B EDL (reordering allowed), quick punch-ins on chosen words (0.12 s eased).
+- Face-tracked framing (YuNet, 4 fps): face top held at 13 % of the frame (was 29 %); per-clip check that the face stays inside the crop — 13/13 ok.
+- One caption position (70 % height), Assistant ExtraBold, #183D32 box, white text, mint highlight on the spoken word.
+- Pop-ups rendered with Pillow (raqm RTL + colour emoji), scale-pop animation.
+- Music: "Party" (Arulo, Mixkit Stock Music Free License — allows social ads; files kept out of git, no standalone redistribution). Groove under the hook → hard stop on "שתים עשרה אלף" → drop (track 13.95 s) synced to "500".
+- 13 Mixkit SFX aligned on their measured peak (impacts, coins) or with a lead (riser peaks on the cut).
+- Dialogue: per-clip RMS levelling, high-pass, light denoise, compression; music ducked by sidechain; −14 LUFS, −1 dBTP.
+
+Found by QC and fixed in the pipeline (not by hand):
+- Cuts on Whisper word times landed inside neighbouring words (e.g. the "ר" of "כלומר" audible) → every cut snaps to the quietest 10 ms between words (cut-point level dropped 5–15 dB); 40 ms fades where speech is continuous.
+- Mixed Hebrew/number/₪ pop-ups read awkwardly → Hebrew convention "500 ₪".
+- Two-emoji pop-up lost its second emoji → canvas sized per emoji.
+
+Rules learned:
+- Never cut exactly on ASR word boundaries; snap to the audio.
+- Mixkit asset pages: titles follow their audio URL in the HTML.
+- Render time for a 30 s 1080×1920 edit with all effects: ~1 min 10 s on 4 cores.

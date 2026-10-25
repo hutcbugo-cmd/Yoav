@@ -63,6 +63,22 @@ frame width/height — set it to the subject's face), `--zoom 0.15`, `--no-zoom`
 `--font "DejaVu Sans"` (any installed font with Hebrew glyphs), `--height 1080`,
 `--crf 20`, `--preset medium`.
 
+## Finished-ad renderer (`vplan.py`)
+
+After the content (Stage A) and edit list (Stage B) are approved, the edit list is
+written as `work/plan.json` (see `examples/plan.example.json`) and rendered:
+
+```bash
+python3 vplan.py work/plan.json -o final.mp4
+```
+
+Plan fields: `clips` (source in/out, `zoom`, optional `punch_at`/`punch_zoom`),
+`popups` (text/emoji at a source time), `music` (track sections; `sync` lands a
+track time on a word), `sfx` (`align`: `peak` with optional `lead`, or `start`),
+`style` (font, `accent`, `highlight`, caption position/size, LUFS), `framing`
+(`base_zoom`, `face_top`). Cuts snap to the quietest point between words;
+`work/plan_resolved.json` records the final cut points for QC.
+
 ## Tested accuracy
 
 Measured on 8 real Hebrew recordings from Google FLEURS (dev split, different
