@@ -69,6 +69,8 @@ def render_popup(pu, path, style, W, H):
         return render_sticker(pu, path, H)
     if kind == "glow":
         return render_glow(pu, path, style, W)
+    if kind == "price":
+        return render_price(pu, path, style, W)
     return render_box(pu.get("text", ""), pu.get("emoji", ""), path, style, W)
 
 
@@ -130,6 +132,49 @@ def render_glow(pu, path, style, W):
         out.alpha_composite(em, (pad, (ch - em.height) // 2))
     out.save(path)
     return out.size
+
+
+def render_price(pu, path, style, W):
+    """Accent card: old price struck through in red above the new price (+ emoji)."""
+    from PIL import Image, ImageDraw, ImageFont
+    big = round(W * style.get("popup_size", 0.085) * 1.25)
+    small = round(big * 0.55)
+    fb, fs_ = ImageFont.truetype(style["font_file"], big), ImageFont.truetype(style["font_file"], small)
+    old_t, new_t = pu["old"], pu["new"]
+    lo = fs_.getbbox(old_t, direction="rtl", features=["-liga"])
+    ln = fb.getbbox(new_t, direction="rtl", features=["-liga"])
+    em = None
+    if pu.get("emoji"):
+        ef = ImageFont.truetype(EMOJI_FONT, 109)
+        em = Image.new("RGBA", (140 * len(pu["emoji"]), 128), (0, 0, 0, 0))
+        ImageDraw.Draw(em).text((0, 0), pu["emoji"], font=ef, embedded_color=True)
+        em = em.crop(em.getbbox())
+        em = em.resize((round(em.width * big / em.height), big), Image.LANCZOS)
+    gap = round(big * 0.2)
+    new_w = ln[2] - ln[0] + (em.width + gap if em else 0)
+    pad_x, pad_y, line_gap = round(big * 0.4), round(big * 0.25), round(big * 0.12)
+    bw = max(lo[2] - lo[0], new_w) + 2 * pad_x
+    bh = (lo[3] - lo[1]) + line_gap + (ln[3] - ln[1]) + 2 * pad_y
+    img = Image.new("RGBA", (bw + 16, bh + 16), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    rgb = hex_rgb(style["accent"])
+    d.rounded_rectangle((10, 12, bw + 10, bh + 12), radius=round(bh * 0.18), fill=(0, 0, 0, 90))
+    d.rounded_rectangle((4, 4, bw + 4, bh + 4), radius=round(bh * 0.18), fill=rgb + (255,))
+    # old price, centred, dimmed, with a red strike
+    ox = 4 + (bw - (lo[2] - lo[0])) // 2 - lo[0]
+    oy = 4 + pad_y - lo[1]
+    d.text((ox, oy), old_t, font=fs_, fill=(255, 255, 255, 170), direction="rtl", features=["-liga"])
+    sy = 4 + pad_y + (lo[3] - lo[1]) // 2
+    d.line((ox + lo[0] - 6, sy + 4, ox + lo[2] + 6, sy - 4), fill=(255, 70, 85, 255), width=max(4, small // 9))
+    # new price (+ emoji on the left, i.e. the end of the RTL line)
+    ny = 4 + pad_y + (lo[3] - lo[1]) + line_gap
+    nx = 4 + (bw - new_w) // 2
+    if em:
+        img.alpha_composite(em, (nx, ny + ((ln[3] - ln[1]) - em.height) // 2))
+        nx += em.width + gap
+    d.text((nx - ln[0], ny - ln[1]), new_t, font=fb, fill=(255, 255, 255, 255), direction="rtl", features=["-liga"])
+    img.save(path)
+    return img.size
 
 
 def render_box(text, emoji, path, style, W):

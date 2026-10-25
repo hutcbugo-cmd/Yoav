@@ -94,3 +94,9 @@ Rules (apply to every future edit):
 - One shot per thought: cut between answers/ideas, not inside them. Size changes on cuts and on emphasis words only.
 - Only keep answers that are clear and confident; a hesitant answer needs a strong reason.
 - Baseline for StreetUP edits = v2 cutting, framing and pace (`examples/plan.example.json`).
+
+## Round 6 — v4 = v2 unchanged + pop-ups (client: v2 wins on answers, pace, sounds; captions so-so in both)
+
+Clips, captions, music, framing identical to v2 (`examples/plan_v4.example.json`); cut points only moved to frame boundaries (lip-sync fix from round 4, 29.2 s → 29.5 s).
+Added: strike-through price card ("12,000 ₪" crossed in red → "רק 500 ₪ 😱", new `price` pop-up kind), white flash on "500", watch sticker beside her head on "שעון" and on "L&P", reaction emoji (💸 🤔 😂 🎁❤️), two quiet pops for the stickers.
+Open: client is not fully happy with the caption style in either version — needs direction (examples) before changing it.
