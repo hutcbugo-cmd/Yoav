@@ -33,8 +33,15 @@ python3 vedit.py transcribe interview.mp4
 # 2. analyze -> work/edl.json   (prints detected Q/A, removed words, new duration)
 python3 vedit.py analyze interview.mp4
 
-#    optional: open work/edl.json and fix anything — e.g. edit "keep" ranges,
-#    change a block "type", or fix a word's text (subtitles use these words)
+#    optional but recommended: write work/review.json, then re-run analyze.
+#    It fixes misheard words, drops hallucinated lines and marks who asks the
+#    questions, all keyed by time so word timings (and subtitles) stay exact:
+#    {
+#     "fix":      [{"t": 98.0, "from": "אלחלת,", "to": "אל-חלד,"}],  # word nearest t; "to": "" deletes
+#     "delete":   [[62.34, 62.95]],                                 # drop all words in range
+#     "question": [[0.6, 1.9], [8.1, 14.6]],                        # force Q label (interviewer)
+#     "answer":   [[2.2, 3.0]]                                      # force A label
+#    }
 
 # 3. render -> edited.mp4
 python3 vedit.py render interview.mp4 -o edited.mp4
@@ -71,7 +78,22 @@ Things the test caught and fixed:
   any region still without words is **kept** in the edit rather than cut.
 - Whisper's "תודה רבה" hallucination on near-silence is filtered.
 
+## First real-footage run (vertical street interview, 2:13)
+
+Raw 133 s → edited 91 s. Transcription took ~5.5 min on 4 CPU cores, render ~1.8 min.
+Fixed along the way:
+- Whisper fragments ("תודה.", "כן.", "כאן.") prefixed with an invisible RTL mark,
+  plus a Knesset-speech hallucination, slipped past the filter → filtered.
+- The false-start rule cut the interviewee's answer ("שתים עשרה אלף") because
+  "השעון הזה" recurred mid-sentence → both occurrences must now open a phrase
+  (or be an immediate repeat); the real flubbed retake is still removed.
+- Captions were sized for 16:9 and `--height` shrank 9:16 video → both now use the shorter side.
+- A question removed with a retake still got a chapter → skipped.
+
 ## Known limits
+- Speakers aren't identified (the test footage is mono), so question/answer
+  labels come from wording; use `"question"` ranges in review.json for accuracy.
+- Transcription is ~2.5× real time when there are many short speech regions.
 - A misrecognised word can turn a statement into a question (the test turned
   "מים נשפכים…" into "מה משפחים…?"), so check the Q/A list `analyze` prints.
 - English words inside Hebrew sentences may be placed at the wrong end of the line.

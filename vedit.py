@@ -79,11 +79,11 @@ def cmd_transcribe(a):
             if any(s.words for s in got):
                 break
         for s in got:
-            words = [{"w": w.word.strip(), "s": round(w.start + s0, 3), "e": round(w.end + s0, 3),
-                      "p": round(w.probability, 3)} for w in (s.words or []) if w.word.strip()]
+            words = [{"w": w.word.strip(BIDI_MARKS + " "), "s": round(w.start + s0, 3), "e": round(w.end + s0, 3),
+                      "p": round(w.probability, 3)} for w in (s.words or []) if w.word.strip(BIDI_MARKS + " ")]
             if words:
                 out["segments"].append({"s": round(s.start + s0, 3), "e": round(s.end + s0, 3),
-                                        "text": s.text.strip(), "words": words})
+                                        "text": s.text.strip(BIDI_MARKS + " "), "words": words})
                 print(f"[{s.start + s0:7.2f}-{s.end + s0:7.2f}] {s.text.strip()}", file=sys.stderr)
         if not any(s.words for s in got):
             # speech the model couldn't transcribe: analyze keeps it rather than cutting it
@@ -100,14 +100,23 @@ def cmd_transcribe(a):
 # so the analyzer can find and remove them; Whisper otherwise "cleans" speech.
 VERBATIM_PROMPT = "אה, אמ... כן. אז, אממ, מה שרציתי להגיד זה... שאלה: מה דעתך?"
 # Whisper's stock outputs for noise / near-silence (subtitle credits leaked from training data)
-HALLUCINATIONS = ("תודה רבה", "תודה שצפיתם", "תודה על הצפייה", "כתוביות", "תרגום")
+HALLUCINATIONS = ("תודה רבה", "תודה שצפיתם", "תודה על הצפייה", "כתוביות", "תרגום", "אדוני היושב", "חברי הכנסת")
+
+
+BIDI_MARKS = "‎‏‪‫‬‭‮⁦⁧⁨⁩"
 
 
 def is_hallucination(seg):
-    text = seg.text.strip().strip(PUNCT).strip()
-    if any(text.startswith(h) for h in HALLUCINATIONS) and (seg.end - seg.start < 1.0 or seg.no_speech_prob > 0.5):
+    raw = seg.text.strip()
+    text = raw.strip(BIDI_MARKS + PUNCT + " ")
+    dur = seg.end - seg.start
+    if any(text.startswith(h) for h in HALLUCINATIONS) and (dur < 1.0 or seg.no_speech_prob > 0.5):
         return True
-    return seg.no_speech_prob > 0.8 and seg.avg_logprob < -1.0
+    # On real interview audio the ivrit.ai model emitted short fragments ("כאן.", "כן.", "תודה.")
+    # between sentences, each prefixed with a right-to-left embedding mark; real speech had none.
+    if raw[:1] in BIDI_MARKS and dur < 0.5:
+        return True
+    return dur < 0.15 or (seg.no_speech_prob > 0.8 and seg.avg_logprob < -1.0)
 
 
 # ---------------------------------------------------------------- analyze
@@ -132,6 +141,55 @@ def is_question(words):
     return first in QUESTION_WORDS and len(words) <= 25
 
 
+def apply_review(tr, review):
+    """Hand / AI review of the transcript, keyed by time so word timings survive:
+      "fix":    [{"t": 96.9, "from": "אלחלת,", "to": "אל-חלד,"}]  word nearest t (to "" deletes it)
+      "delete": [[62.3, 62.95]]   drop every word in the range (e.g. a hallucinated line)
+      "question" / "answer": [[start, end], ...]   force the label of words in the range"""
+    words = [w for seg in tr["segments"] for w in seg["words"]]
+    for fx in review.get("fix", []):
+        cands = [w for w in words if norm(w["w"]) == norm(fx["from"]) and not w.get("_del")
+                 and abs((w["s"] + w["e"]) / 2 - fx["t"]) < 2]
+        if not cands:
+            print(f"review: no word {fx['from']!r} near {fx['t']}s - skipped", file=sys.stderr)
+            continue
+        w = min(cands, key=lambda w: abs((w["s"] + w["e"]) / 2 - fx["t"]))
+        if fx["to"]:
+            w["w"] = fx["to"]
+        else:
+            w["_del"] = True
+    for s, e in review.get("delete", []):
+        for w in words:
+            if s <= (w["s"] + w["e"]) / 2 <= e:
+                w["_del"] = True
+    for seg in tr["segments"]:
+        seg["words"] = [w for w in seg["words"] if not w.get("_del")]
+    tr["segments"] = [seg for seg in tr["segments"] if seg["words"]]
+
+
+def forced_label(w, review):
+    mid = (w["s"] + w["e"]) / 2
+    for kind in ("question", "answer"):
+        if any(s <= mid <= e for s, e in review.get(kind, [])):
+            return kind
+    return None
+
+
+def split_by_label(sents, review):
+    """Split sentences where a reviewed question/answer range starts or ends
+    (Whisper often runs an answer and the next question together)."""
+    out = []
+    for sent in sents:
+        cur = [sent[0]]
+        for w in sent[1:]:
+            if forced_label(w, review) != forced_label(cur[-1], review):
+                out.append(cur)
+                cur = []
+            cur.append(w)
+        out.append(cur)
+    return out
+
+
 def mark_mistakes(sents):
     """Return per-word drop flags + reasons: fillers, stutters, false starts."""
     flat = [w for s in sents for w in s]
@@ -142,13 +200,27 @@ def mark_mistakes(sents):
             drop[i] = "filler"
         elif i + 1 < len(flat) and n and n == norm(flat[i + 1]["w"]) and flat[i + 1]["s"] - w["e"] < 0.6:
             drop[i] = "stutter"  # "אני אני" -> keep the second
-    # False start: a phrase restarted with the same 2+ opening words within a few seconds.
-    # Drop the abandoned attempt, keep the last take.
+    # False start: a phrase restarted from its beginning with the same 2+ opening words
+    # within a few seconds. Drop the abandoned attempt, keep the last take. Both occurrences
+    # must open a phrase: on real footage, words repeated mid-sentence (an interviewee
+    # echoing the question, "השעון הזה" reused in the next line) are not restarts.
+    def opens_phrase(i):
+        if i == 0 or flat[i].get("seg_start"):
+            return True
+        prev = flat[i - 1]
+        return prev["w"].rstrip("\"'״").endswith((".", "?", "!")) or flat[i]["s"] - prev["e"] > 0.3
+
     for i in range(len(flat)):
+        if not opens_phrase(i):
+            continue
         for j in range(i + 2, min(i + 15, len(flat) - 1)):
             if flat[j]["s"] - flat[i]["s"] > 8:
                 break
-            if all(norm(flat[i + k]["w"]) == norm(flat[j + k]["w"]) for k in range(2)) and norm(flat[i]["w"]):
+            n = j - i  # an immediate repeat of the whole phrase ("אני חושב אני חושב") needs no pause
+            adjacent = n <= 4 and j + n <= len(flat) and \
+                all(norm(flat[i + k]["w"]) == norm(flat[j + k]["w"]) for k in range(n))
+            if (opens_phrase(j) or adjacent) and norm(flat[i]["w"]) and \
+                    all(norm(flat[i + k]["w"]) == norm(flat[j + k]["w"]) for k in range(2)):
                 for k in range(i, j):
                     drop[k] = drop[k] or "false-start"
                 break
@@ -161,12 +233,22 @@ def cmd_analyze(a):
         return analyze_silence_only(a, meta)
     with open(os.path.join(a.work, "transcript.json"), encoding="utf-8") as f:
         tr = json.load(f)
-    sents = split_sentences(tr["segments"])
+    review_path = a.review or os.path.join(a.work, "review.json")
+    review = {}
+    if os.path.exists(review_path):
+        with open(review_path, encoding="utf-8") as f:
+            review = json.load(f)
+        apply_review(tr, review)
+        print(f"applied review corrections from {review_path}")
+    for seg in tr["segments"]:
+        if seg["words"]:
+            seg["words"][0]["seg_start"] = True
+    sents = split_by_label(split_sentences(tr["segments"]), review)
     flat, drop = mark_mistakes(sents)
     # label sentences
     idx, blocks = 0, []
     for s in sents:
-        blocks.append({"type": "question" if is_question(s) else "answer",
+        blocks.append({"type": forced_label(s[0], review) or ("question" if is_question(s) else "answer"),
                        "s": s[0]["s"], "e": s[-1]["e"], "text": " ".join(w["w"] for w in s),
                        "word_idx": list(range(idx, idx + len(s)))})
         idx += len(s)
@@ -281,12 +363,13 @@ def build_ass(edl, w, h, font):
     if cur:
         chunks.append(cur)
 
-    fs = round(h * 0.062)
+    # size from the narrower side so vertical (9:16) video gets captions that fit the width
+    fs = round(min(h * 0.062, w * 0.075))
     head = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {w}
 PlayResY: {h}
-WrapStyle: 2
+WrapStyle: 0
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
@@ -341,8 +424,9 @@ def cmd_render(a):
     meta = edl["meta"]
     src = a.video or edl["source"]
     W, H = (meta["w"] // 2) * 2, (meta["h"] // 2) * 2
-    if a.height and a.height < H:
-        W, H = round(W * a.height / H / 2) * 2, a.height
+    if a.height and a.height < min(W, H):  # limit the shorter side, so 9:16 video stays 1080x1920
+        k = a.height / min(W, H)
+        W, H = round(W * k / 2) * 2, round(H * k / 2) * 2
     fx, fy = map(float, a.focus.split(","))
     keep, plan = edl["keep"], zoom_plan(edl["keep"], 0 if a.no_zoom else a.zoom)
     parts, labels = [], []
@@ -389,8 +473,9 @@ def write_chapters(edl, work):
         offs.append(acc)
         acc += k["e"] - k["s"]
     marks = []
-    for b in edl["blocks"]:
-        if b["type"] != "question":
+    live = {w["block"] for w in edl["words"] if not w.get("drop")}
+    for bi, b in enumerate(edl["blocks"]):
+        if b["type"] != "question" or bi not in live:  # skip questions removed with a retake
             continue
         for k, o in zip(keep, offs):
             if k["e"] >= b["s"]:
@@ -429,6 +514,7 @@ def main():
         sp.add_argument("--pad", type=float, default=0.12, help="seconds kept around speech")
         sp.add_argument("--max-gap", type=float, default=0.45, help="pauses longer than this are cut")
         sp.add_argument("--silence-only", action="store_true", help="no transcript: cut silences only")
+        sp.add_argument("--review", help="review corrections JSON (default: <work>/review.json if present)")
         sp.add_argument("--noise", type=float, default=-35, help="silencedetect threshold (dB)")
     for sp in (r, al):
         sp.add_argument("-o", "--output", default="edited.mp4")
@@ -437,7 +523,7 @@ def main():
         sp.add_argument("--no-subs", action="store_true")
         sp.add_argument("--focus", default="0.5,0.35", help="zoom anchor x,y in 0..1 (face position)")
         sp.add_argument("--font", default="DejaVu Sans")
-        sp.add_argument("--height", type=int, default=1080, help="max output height")
+        sp.add_argument("--height", type=int, default=1080, help="max size of the shorter side (1080 = 1080p)")
         sp.add_argument("--crf", type=int, default=20)
         sp.add_argument("--preset", default="medium")
     a = p.parse_args()
