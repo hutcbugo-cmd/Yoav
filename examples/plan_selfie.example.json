@@ -1,0 +1,249 @@
+{
+ "source": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video2/raw.mp4",
+ "work": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video2/work",
+ "sfx_dir": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/sfx",
+ "style": {
+  "font": "Assistant ExtraBold",
+  "font_file": "/home/user/Yoav/assets/fonts/Assistant-800.ttf",
+  "accent": "#183D32",
+  "highlight": "#9EE6C1",
+  "caption_y": 0.7,
+  "caption_size": 0.082,
+  "popup_y": 0.53,
+  "popup_size": 0.085,
+  "lufs": -14,
+  "dialog_rms": -20,
+  "caption_mode": "fill",
+  "fill_color": "#27995F"
+ },
+ "framing": {
+  "base_zoom": 1.0,
+  "face_top": 0.13
+ },
+ "clips": [
+  {
+   "s": 0.3,
+   "e": 1.85,
+   "zoom": 1.0,
+   "note": "Q: יונתן, מה אתה חושב על השעון הזה?"
+  },
+  {
+   "s": 2.25,
+   "e": 3.42,
+   "zoom": 1.15,
+   "note": "וואו, אחד היפים."
+  },
+  {
+   "s": 3.5,
+   "e": 4.35,
+   "zoom": 1.0,
+   "note": "Q: כמה הוא עולה?"
+  },
+  {
+   "s": 4.55,
+   "e": 5.1,
+   "zoom": 1.15,
+   "note": "מיליון.",
+   "punch_at": 4.62,
+   "punch_zoom": 1.25
+  },
+  {
+   "s": 5.45,
+   "e": 6.65,
+   "zoom": 1.0,
+   "note": "לא, לא. תוריד."
+  },
+  {
+   "s": 7.05,
+   "e": 7.78,
+   "zoom": 1.15,
+   "note": "20,000."
+  },
+  {
+   "s": 8.25,
+   "e": 10.35,
+   "zoom": 1.0,
+   "note": "REVEAL: השעון הזה עולה 500 שקל.",
+   "punch_at": 9.32,
+   "punch_zoom": 1.15
+  },
+  {
+   "s": 10.65,
+   "e": 12.82,
+   "zoom": 1.0,
+   "note": "Q: אתה קונה לאבא שלך?"
+  },
+  {
+   "s": 12.88,
+   "e": 14.25,
+   "zoom": 1.15,
+   "note": "ברור. שתיים."
+  },
+  {
+   "s": 14.25,
+   "e": 15.05,
+   "zoom": 1.0,
+   "note": "tongue-out reaction",
+   "no_captions": true,
+   "punch_at": 14.3,
+   "punch_zoom": 1.12
+  }
+ ],
+ "popups": [
+  {
+   "kind": "image",
+   "image": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video1/product/watch_sticker.png",
+   "at": 1.31,
+   "dur": 1.2,
+   "height": 0.17,
+   "x": 0.82,
+   "y": 0.53,
+   "rotate": -8
+  },
+  {
+   "emoji": "😍",
+   "at": 2.74,
+   "dur": 0.8
+  },
+  {
+   "emoji": "🤔",
+   "at": 3.54,
+   "dur": 0.8
+  },
+  {
+   "text": "מיליון ₪",
+   "emoji": "🤑",
+   "at": 4.62,
+   "dur": 0.6
+  },
+  {
+   "emoji": "😂",
+   "at": 5.47,
+   "dur": 0.9
+  },
+  {
+   "text": "20,000 ₪",
+   "at": 7.11,
+   "dur": 0.75
+  },
+  {
+   "kind": "price",
+   "old": "20,000 ₪",
+   "new": "רק 500 ₪",
+   "emoji": "😱",
+   "at": 9.32,
+   "dur": 1.45
+  },
+  {
+   "text": "שניים!",
+   "emoji": "⌚⌚",
+   "at": 13.74,
+   "dur": 0.75
+  },
+  {
+   "emoji": "😜",
+   "at": 14.3,
+   "dur": 0.75
+  }
+ ],
+ "flashes": [
+  {
+   "at": 9.32,
+   "dur": 0.3
+  }
+ ],
+ "music": {
+  "file": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/m303.mp3",
+  "title": "Party — Arulo (Mixkit Stock Music Free License)",
+  "gain_db": -15,
+  "sections": [
+   {
+    "out_until": 8.25,
+    "track_start": 22.2,
+    "fade_out": 0.06
+   },
+   {
+    "out_from": 8.25,
+    "sync": {
+     "src": 9.32,
+     "track": 13.95
+    },
+    "fade_out": 0.8
+   }
+  ]
+ },
+ "sfx": [
+  {
+   "name": "pop2",
+   "at": 1.31,
+   "gain_db": -14,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  },
+  {
+   "name": "sparkle",
+   "at": 2.74,
+   "gain_db": -14,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.15
+  },
+  {
+   "name": "riser",
+   "at": 4.55,
+   "gain_db": -15,
+   "dur": 1.2,
+   "align": "peak",
+   "lead": 1.0
+  },
+  {
+   "name": "impact",
+   "at": 4.62,
+   "gain_db": -10,
+   "dur": 1.2,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "whoosh2",
+   "at": 5.45,
+   "gain_db": -18,
+   "dur": 0.7,
+   "align": "peak",
+   "lead": 0.35
+  },
+  {
+   "name": "pop",
+   "at": 7.11,
+   "gain_db": -14,
+   "dur": 0.5,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "coin",
+   "at": 9.32,
+   "gain_db": -10,
+   "dur": 1.3,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "money",
+   "at": 13.74,
+   "gain_db": -12,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.1
+  },
+  {
+   "name": "pop2",
+   "at": 14.3,
+   "gain_db": -14,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  }
+ ]
+}

@@ -319,7 +319,7 @@ def main():
     with open(a.plan, encoding="utf-8") as f:
         plan = json.load(f)
     work = plan["work"]
-    src = plan["source"]
+    src = normalize_source(plan["source"], work)
     meta = vedit.probe(src)
     W, H = (meta["w"] // 2) * 2, (meta["h"] // 2) * 2
     st = plan["style"]
@@ -361,7 +361,7 @@ def main():
     total = acc
     words_by_clip = []
     for c, o in zip(clips, offsets):
-        ws = [w for w in allw if c["s"] <= (w["s"] + w["e"]) / 2 <= c["e"]]
+        ws = [] if c.get("no_captions") else [w for w in allw if c["s"] <= (w["s"] + w["e"]) / 2 <= c["e"]]
         words_by_clip.append([{"w": w["w"], "s": o + max(w["s"], c["s"]) - c["s"],
                                "e": o + min(w["e"], c["e"]) - c["s"]} for w in ws])
 
@@ -451,6 +451,8 @@ def main():
                      f"pad=w={pw}:h={ph}:x='(ow-iw)/2':y='(oh-ih)/2':eval=frame:color=0x00000000,"
                      f"fade=t=out:st={dur - 0.12:.3f}:d=0.12:alpha=1,setpts=PTS+{t0:.3f}/TB[p{k}]")
         py = round(H * pu.get("y", st.get("popup_y", 0.53)))
+        if "y" not in pu and "x" not in pu:  # explicit positions are kept as given
+            py = place_clear_of_face(pu["at"], py, ph, pw, clips, faces, base, face_top, W, H, st)
         px = f"{round(W * pu['x'])}-w/2" if "x" in pu else "(W-w)/2"
         graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2':eof_action=pass:"
                      f"enable='between(t,{t0:.3f},{t0 + dur:.3f})'[vp{k}]")
@@ -536,6 +538,53 @@ def main():
                     "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart",
                     "-t", f"{total:.3f}", a.output], check=True)
     print(f"wrote {a.output}")
+
+
+def place_clear_of_face(src_t, py, ph, pw, clips, faces, base, face_top, W, H, st):
+    """Move a pop-up off the face visible at src_t: keep the default height if it is clear,
+    else go below the chin (above the captions) or above the head. In selfie footage the
+    fixed height covered mouths and the closing tongue-out punchline."""
+    near = [f for f in faces if abs(f[0] - src_t) <= 0.3]
+    clip = next((c for c in clips if c["s"] - 0.15 <= src_t <= c["e"] + 0.15), None)
+    if not near or clip is None:
+        return py
+    _, cx, top, fh = min(near, key=lambda f: abs(f[0] - src_t))
+    z = base * (clip.get("punch_zoom", clip.get("zoom", 1.0)) if src_t >= clip.get("punch_at", 1e9)
+                else clip.get("zoom", 1.0))
+    ih = H * z
+    y0 = min(max(top * ih - face_top * H, 0), ih - H)
+    ftop, fbot = (top * ih - y0) / H, ((top + fh * 1.15) * ih - y0) / H  # 1.15: chin below the box
+    margin = 0.02
+    half = ph / 2 / H
+
+    def clear(yc):
+        return yc + half < ftop - margin or yc - half > fbot + margin
+    cap_top = st.get("caption_y", 0.70) - st.get("caption_size", 0.068) * W / H
+    for yc in (py / H, fbot + margin + half, ftop - margin - half):
+        if half + 0.02 <= yc <= cap_top - half and clear(yc):
+            return round(yc * H)
+    return round(max(half + 0.02, ftop - margin - half) * H) if ftop - margin - half > half else py
+
+
+def normalize_source(src, work):
+    """Phone footage (iPhone: HEVC 10-bit HLG/HDR, rotation flag, extra data tracks) is
+    converted once to an 8-bit SDR H.264 working copy. Rendering straight from it used
+    ~14 GB of RAM (OOM-killed) and the HDR colours came out washed-out grey."""
+    info = json.loads(subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-print_format", "json",
+                                      "-show_streams", src], capture_output=True, text=True, check=True).stdout)
+    v = info["streams"][0]
+    hdr = v.get("color_transfer") in ("arib-std-b67", "smpte2084")
+    if not hdr and v.get("codec_name") == "h264" and v.get("pix_fmt") == "yuv420p":
+        return src
+    out = os.path.join(work, "source_sdr.mp4")
+    if os.path.exists(out) and os.path.getmtime(out) > os.path.getmtime(src):
+        return out
+    vf = ("zscale=t=linear:npl=203,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=mobius:desat=0,"
+          "zscale=t=bt709:m=bt709:r=tv,format=yuv420p") if hdr else "format=yuv420p"
+    print(f"normalizing source ({v.get('codec_name')} {v.get('pix_fmt')}{', HDR tone-mapped' if hdr else ''})")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", src, "-map", "0:v:0", "-map", "0:a:0", "-vf", vf,
+                    "-c:v", "libx264", "-preset", "fast", "-crf", "14", "-c:a", "pcm_s16le", out], check=True)
+    return out
 
 
 def snap_clip(c, words, audio, fps, sr=16000, start=True, end=True):

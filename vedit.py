@@ -286,6 +286,12 @@ def apply_review(tr, review):
             w["w"] = fx["to"]
         else:
             w["_del"] = True
+            # a deleted token glued to the previous word is the rest of a split word
+            # ("20" + ",000.", "ו" + "-1"): give its time to that word, or cuts clip it
+            k = words.index(w)
+            prev = next((p for p in reversed(words[:k]) if not p.get("_del")), None)
+            if prev is not None and w["s"] - prev["e"] < 0.05:
+                prev["e"] = max(prev["e"], w["e"])
     for s, e in review.get("delete", []):
         for w in words:
             if s <= (w["s"] + w["e"]) / 2 <= e:

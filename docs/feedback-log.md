@@ -111,3 +111,15 @@ Same chunking, position and pop-in as v2. Plan: `examples/plan_v5.example.json`.
 Default caption style for StreetUP from now on: `fill` with the brand's dark accent.
 - Round 7b: #183D32 fill disappears on dark clothing → caption fill #27995F (compared 4 shades on the real frame); caption size 7.6 % → 8.2 % of width.
   Rule: test accent colours against the actual background before rendering; brand-dark colours need a lighter variant for text fills.
+
+## Round 8 — second video (iPhone selfie, two soldiers, 15 s → 13.3 s) in the v5 style, no approval stages (client asked "everything included")
+
+New footage exposed four pipeline gaps, all fixed in code:
+| Problem | Cause | Fix |
+|---|---|---|
+| ffmpeg OOM-killed (~14 GB) | iPhone HEVC 10-bit with rotation + 9 extra tracks, decoded per clip | `normalize_source`: one 8-bit H.264 working copy before rendering |
+| Colours would be washed-out grey | Source is HDR (HLG, BT.2020) | HDR→SDR tone mapping (zscale + tonemap **mobius**, chosen over hable/naive by comparing frames) |
+| "20,000" end clipped by 60 ms | Review deleted the split token ",000." but the merged word kept the first token's end | deleting a token glued to the previous word extends that word's time |
+| Pop-ups covered mouths and the tongue-out punchline | Fixed pop-up height (53 %) assumes interview framing; selfie faces sit lower and larger | `place_clear_of_face`: at each pop-up's time, compute the face box in the output frame (incl. zoom) and use default / below chin / above head, whichever is clear |
+Selfie framing: faces are already 31 % of frame height → base zoom 1.0 (v5's 1.22 would be too tight), punch-ins +15 % on answers.
+Plan: `examples/plan_selfie.example.json`.
