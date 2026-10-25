@@ -305,6 +305,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 pop = r"{\fscx88\fscy88\t(0,90,\fscx100\fscy100)}" if i == 0 else ""
                 lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(e)},Cap,,0,0,0,,"
                              f"{{\\an5\\pos({W // 2},{y})}}{pop}{txt}")
+    # force a right-to-left base direction: libass takes it from the first strong
+    # character, so a caption starting with a Latin brand ("Nomi היא...") was laid out LTR
+    # and the brand jumped to the wrong side. RLM after the override block fixes it.
+    rtl = []
+    for ln in lines:
+        body_at = ln.find(",,0,0,0,,") + len(",,0,0,0,,")
+        rest = ln[body_at:]
+        lead = ""
+        while rest.startswith("{"):  # keep leading override blocks first
+            j = rest.find("}") + 1
+            lead, rest = lead + rest[:j], rest[j:]
+        rtl.append(ln[:body_at] + lead + ("\u200f" if any("\u0590" <= ch <= "\u05ff" for ch in rest) else "") + rest)
+    lines = rtl
     return head + "\n".join(lines) + "\n"
 
 

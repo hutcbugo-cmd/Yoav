@@ -123,3 +123,11 @@ New footage exposed four pipeline gaps, all fixed in code:
 | Pop-ups covered mouths and the tongue-out punchline | Fixed pop-up height (53 %) assumes interview framing; selfie faces sit lower and larger | `place_clear_of_face`: at each pop-up's time, compute the face box in the output frame (incl. zoom) and use default / below chin / above head, whichever is clear |
 Selfie framing: faces are already 31 % of frame height → base zoom 1.0 (v5's 1.22 would be too tight), punch-ins +15 % on answers.
 Plan: `examples/plan_selfie.example.json`.
+
+## Round 9 — video 3 (Nomi app): Latin brand name inside Hebrew captions
+
+Client: the app is "Nomi" (Latin letters) and must sit on the correct side — a sentence ending with Nomi shows it on the left.
+Tested with libass (measured the brand's pixel position): captions starting with a Latin word were laid out left-to-right
+("Nomi היא האפליקציה" → Nomi on the left). Fix: every Hebrew caption gets an RLM (U+200F) after its override tags,
+forcing a right-to-left base direction; all four test cases now correct. Pop-ups already render with direction="rtl".
+Glossary: `{"Nomi": ["נעמי","נומי","לאומי"], "ל-Nomi": ["לנעמי","לנומי"]}`.
