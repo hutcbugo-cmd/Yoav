@@ -8,13 +8,13 @@
   "accent": "#183D32",
   "highlight": "#9EE6C1",
   "caption_y": 0.7,
-  "caption_size": 0.076,
+  "caption_size": 0.082,
   "popup_y": 0.53,
   "popup_size": 0.085,
   "lufs": -14,
   "dialog_rms": -20,
   "caption_mode": "fill",
-  "fill_color": "#183D32"
+  "fill_color": "#27995F"
  },
  "framing": {
   "base_zoom": 1.22,

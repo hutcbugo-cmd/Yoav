@@ -109,3 +109,5 @@ same black stroke. (First try added a white outline around the green word for co
 no white wrap. Rule: implement the client's description literally first; propose extras separately.)
 Same chunking, position and pop-in as v2. Plan: `examples/plan_v5.example.json`.
 Default caption style for StreetUP from now on: `fill` with the brand's dark accent.
+- Round 7b: #183D32 fill disappears on dark clothing → caption fill #27995F (compared 4 shades on the real frame); caption size 7.6 % → 8.2 % of width.
+  Rule: test accent colours against the actual background before rendering; brand-dark colours need a lighter variant for text fills.
