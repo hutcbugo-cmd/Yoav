@@ -256,6 +256,24 @@ def apply_review(tr, review):
       "fix":    [{"t": 96.9, "from": "אלחלת,", "to": "אל-חלד,"}]  word nearest t (to "" deletes it)
       "delete": [[62.3, 62.95]]   drop every word in the range (e.g. a hallucinated line)
       "question" / "answer": [[start, end], ...]   force the label of words in the range"""
+    # "terms": {"L&P": ["NLP", "L&B"]} - brand / name glossary, applied everywhere. Whisper
+    # mishears brand names inconsistently and sometimes splits them ("L" + "&B");
+    # its hotwords option was tried and fixed only 1 of 2 mentions, so this is deterministic.
+    variants = {norm(v): canon for canon, vs in review.get("terms", {}).items() for v in [canon, *vs]}
+    for seg in tr["segments"]:
+        ws, out, i = seg["words"], [], 0
+        while i < len(ws):
+            w = ws[i]
+            if i + 1 < len(ws) and norm(w["w"] + ws[i + 1]["w"]) in variants and norm(w["w"]) not in variants:
+                w = dict(w, w=w["w"] + ws[i + 1]["w"], e=ws[i + 1]["e"])  # rejoin a split brand name
+                i += 1
+            key = norm(w["w"])
+            if key in variants:
+                core = w["w"].strip().strip(PUNCT)
+                w["w"] = w["w"].replace(core, variants[key]) if core else variants[key]
+            out.append(w)
+            i += 1
+        seg["words"] = out
     words = [w for seg in tr["segments"] for w in seg["words"]]
     for fx in review.get("fix", []):
         cands = [w for w in words if norm(w["w"]) == norm(fx["from"]) and not w.get("_del")

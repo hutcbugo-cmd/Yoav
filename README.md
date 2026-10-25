@@ -42,6 +42,7 @@ python3 vedit.py analyze interview.mp4
 #    It fixes misheard words, drops hallucinated lines and marks who asks the
 #    questions, all keyed by time so word timings (and subtitles) stay exact:
 #    {
+#     "terms":    {"L&P": ["NLP", "L&B"]},                          # brand glossary, applied everywhere
 #     "fix":      [{"t": 98.0, "from": "אלחלת,", "to": "אל-חלד,"}],  # word nearest t; "to": "" deletes
 #     "delete":   [[62.34, 62.95]],                                 # drop all words in range
 #     "question": [[0.6, 1.9], [8.1, 14.6]],                        # force Q label (interviewer)
