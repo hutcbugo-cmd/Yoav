@@ -240,11 +240,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     clean_mode = mode == "clean"
     if mode == "fill":
         # white words with a solid black stroke; the spoken word's fill turns the accent colour
-        ob = max(2, round(fs * 0.06))
+        ob = max(2, round(fs * st.get("stroke", 0.06)))
+        stroke = hex_to_ass(st.get("stroke_color", "#000000"))
         head = head.replace(
             f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,100,0,0,3,{round(fs * 0.22)},0,5,80,80,0,-1",
-            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,"
-            f"{ob},0,5,80,80,0,-1")
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{stroke},&H80000000,0,0,0,0,100,100,0,0,1,"
+            f"{ob},{round(ob * st.get('shadow', 0))},5,90,90,0,-1")
         fill = hex_to_ass(st.get("fill_color", st["accent"]))
         hi_on = r"{\c" + fill + "}"
         hi_off = r"{\c&H00FFFFFF&}"
@@ -263,8 +264,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     for ci, words in enumerate(words_by_clip):
         chunks, cur = [], []
         for wd in words:
-            if cur and (len(cur) >= 3 or wd["s"] - cur[-1]["e"] > 0.35
-                        or sum(len(x["w"]) for x in cur) + len(wd["w"]) > 18):
+            if cur and (len(cur) >= st.get("cap_max_words", 3) or wd["s"] - cur[-1]["e"] > 0.35
+                        or sum(len(x["w"]) for x in cur) + len(wd["w"]) > st.get("cap_max_chars", 18)):
                 chunks.append(cur)
                 cur = []
             cur.append(wd)
@@ -389,7 +390,11 @@ def main():
 
     faces = track_faces(src, meta, os.path.join(work, "faces.json"))
 
-    inputs = ["-i", src]
+    # one input per clip, opened with an accurate seek: a single input split into N trim
+    # branches buffered frames across branches and was OOM-killed on a 7-minute source
+    inputs = []
+    for c in clips:
+        inputs += ["-ss", f"{c['s']:.4f}", "-t", f"{c['e'] - c['s'] + 0.2:.4f}", "-i", src]
     vparts, aparts, labels = [], [], []
     report = []
     for i, c in enumerate(clips):
@@ -408,7 +413,7 @@ def main():
         # keep the face centred horizontally and its top at face_top of the output height
         x = f"min(max({fc['cx']:.4f}*iw-{W / 2},0),iw-{W})"
         y = f"min(max({fc['top']:.4f}*ih-{face_top * H:.1f},0),ih-{H})"
-        vparts.append(f"[0:v]trim=start={c['s']:.3f}:end={c['e']:.3f},setpts=PTS-STARTPTS,{scale},"
+        vparts.append(f"[{i}:v]trim=duration={d:.4f},setpts=PTS-STARTPTS,{scale},"
                       f"crop={W}:{H}:x='{x}':y='{y}',setsar=1,fps={meta['fps']:.5f}[v{i}]")
         # level each clip's dialogue to a common RMS so interviewer / interviewee match
         g0 = i  # level the whole take (run of joined sub-shots) with one gain, so joins stay seamless
@@ -426,7 +431,7 @@ def main():
             return min(0.04 if lvl > rms - 12 else 0.015, d / 4)
         fi = 0.0 if c.get("joined") else edge_fade(c["s"])
         fo = 0.0 if (i + 1 < len(clips) and clips[i + 1].get("joined")) else edge_fade(c["e"])
-        aparts.append(f"[0:a]atrim=start={c['s']:.3f}:end={c['e']:.3f},asetpts=PTS-STARTPTS,volume={gain:.2f}dB"
+        aparts.append(f"[{i}:a]atrim=duration={d:.4f},asetpts=PTS-STARTPTS,volume={gain:.2f}dB"
                       + (f",afade=t=in:d={fi:.3f}" if fi else "") + (f",afade=t=out:st={d - fo:.3f}:d={fo:.3f}" if fo else "")
                       + f"[a{i}]")
         labels.append(f"[v{i}][a{i}]")
@@ -449,25 +454,39 @@ def main():
     vlast = "cv"
     graph.append(f"[{vlast}]ass='{ass}':fontsdir='{fontsdir}'[vs]")
     vlast = "vs"
-    n_in = 1
+    n_in = len(clips)
     for k, pu in enumerate(plan.get("popups", [])):
         png = os.path.join(work, f"popup_{k}.png")
         pw, ph = render_popup(pu, png, st, W, H)
-        pw, ph = 2 * round(pw * 1.13 / 2), 2 * round(ph * 1.13 / 2)  # room for the overshoot
+        grow = 1.12 * (1.07 if pu.get("anim") == "pulse" else 1.0) + 0.01  # pop overshoot (+ pulse)
+        pw, ph = 2 * round(pw * grow / 2 + 1), 2 * round(ph * grow / 2 + 1)
         t0 = out_t(pu["at"])
         dur = pu.get("dur", 1.2)
         inputs += ["-loop", "1", "-t", f"{dur:.3f}", "-i", png]
         # pop: scale 0 -> 112% -> 100% in 0.2 s, then hold; quick fade out at the end
         s_expr = "if(lt(t,0.12),1.12*t/0.12,if(lt(t,0.2),1.12-0.12*(t-0.12)/0.08,1))"
         # constant canvas (overlay can't take frames that change size)
+        anim = pu.get("anim")
+        if anim == "pulse":  # keeps breathing after the pop
+            s_expr = f"({s_expr})*(1+0.07*sin(2*PI*2.5*t))"
+        rot = ""
+        if anim == "shake":  # alarm-clock wobble that settles
+            rot = (",rotate=a='0.22*sin(2*PI*9*t)*exp(-1.2*t)':c=none:"
+                   f"ow='hypot(iw,ih)':oh='hypot(iw,ih)'")
+            pw = ph = 2 * round(((pw ** 2 + ph ** 2) ** 0.5) / 2)
         graph.append(f"[{n_in}:v]format=rgba,scale=w='max(2,iw*{s_expr})':h='max(2,ih*{s_expr})':eval=frame,"
-                     f"pad=w={pw}:h={ph}:x='(ow-iw)/2':y='(oh-ih)/2':eval=frame:color=0x00000000,"
+                     f"pad=w={pw}:h={ph}:x='(ow-iw)/2':y='(oh-ih)/2':eval=frame:color=0x00000000{rot},"
                      f"fade=t=out:st={dur - 0.12:.3f}:d=0.12:alpha=1,setpts=PTS+{t0:.3f}/TB[p{k}]")
         py = round(H * pu.get("y", st.get("popup_y", 0.53)))
         if "y" not in pu and "x" not in pu:  # explicit positions are kept as given
             py = place_clear_of_face(pu["at"], py, ph, pw, clips, faces, base, face_top, W, H, st)
         px = f"{round(W * pu['x'])}-w/2" if "x" in pu else "(W-w)/2"
-        graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2':eof_action=pass:"
+        dy = ""
+        if anim == "bounce":
+            dy = f"-{round(H * 0.025)}*abs(sin(2*PI*2.2*(t-{t0:.3f})))"
+        elif anim == "float":
+            dy = f"-{round(H * 0.012)}*sin(2*PI*1.1*(t-{t0:.3f}))"
+        graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2{dy}':eof_action=pass:"
                      f"enable='between(t,{t0:.3f},{t0 + dur:.3f})'[vp{k}]")
         vlast = f"vp{k}"
         n_in += 1
@@ -613,19 +632,32 @@ def snap_clip(c, words, audio, fps, sr=16000, start=True, end=True):
     hop = sr // 100
     env = np.sqrt(np.convolve(audio ** 2, np.ones(hop) / hop, "same"))
 
-    def quietest(lo, hi):
-        # candidates are frame boundaries only, so the cut is both quiet and frame-exact
+    def level(t):
+        return env[min(len(env) - 1, max(0, int(t * sr)))]
+
+    def tight(lo, hi, toward):
+        """Frame boundary closest to the word (`toward` = "end": earliest after it, "start":
+        latest before it) where the sound has fallen to the local background level.
+        Picking the *quietest* point instead added ~0.25 s of dead air at each edge
+        (53.7 s of script rendered as 58 s)."""
         ts = np.arange(np.ceil(lo * fps), np.floor(hi * fps) + 1) / fps
         if len(ts) == 0:
             return round((lo + hi) / 2 * fps) / fps
-        lv = [env[min(len(env) - 1, max(0, int(t * sr)))] for t in ts]
+        lv = np.array([level(t) for t in ts])
+        around = env[max(0, int((lo - 1.0) * sr)):int((hi + 1.0) * sr)]
+        floor = np.percentile(around, 10) if len(around) else lv.min()
+        quiet = lv <= max(floor * 2.0, lv.min() * 1.2)  # within ~6 dB of the background
+        order = range(len(ts)) if toward == "end" else range(len(ts) - 1, -1, -1)
+        for k in order:
+            if quiet[k]:
+                return float(ts[k])
         return float(ts[int(np.argmin(lv))])
 
     c["s_orig"], c["e_orig"] = c["s"], c["e"]
     if start:
-        c["s"] = round(quietest(max(prev_e - 0.03, first["s"] - 0.25), first["s"] + 0.04), 4)
+        c["s"] = round(tight(max(prev_e - 0.03, first["s"] - 0.25), first["s"] + 0.04, "start"), 4)
     if end:
-        c["e"] = round(quietest(last["e"] - 0.04, min(next_s + 0.03, last["e"] + 0.25)), 4)
+        c["e"] = round(tight(last["e"] - 0.04, min(next_s + 0.03, last["e"] + 0.25), "end"), 4)
 
 
 def vedit_audio(path):

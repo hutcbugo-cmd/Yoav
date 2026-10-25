@@ -131,3 +131,16 @@ Tested with libass (measured the brand's pixel position): captions starting with
 ("Nomi היא האפליקציה" → Nomi on the left). Fix: every Hebrew caption gets an RLM (U+200F) after its override tags,
 forcing a right-to-left base direction; all four test cases now correct. Pop-ups already render with direction="rtl".
 Glossary: `{"Nomi": ["נעמי","נומי","לאומי"], "ל-Nomi": ["לנעמי","לנומי"]}`.
+
+## Round 10 — Nomi v1 (7-min single take with director prompts → 55.9 s, full script, hook 1)
+
+New in the pipeline, each found while building this edit:
+| Problem | Fix |
+|---|---|
+| ffmpeg OOM again on a 7-min H.264 source (17 trim branches from one input buffered frames) | one input per clip with an accurate `-ss` seek; render 46 s instead of OOM |
+| "Pulse" pop-ups crashed the graph (pad smaller than 1.12× overshoot × 1.07 pulse) | canvas sized from the animation |
+| Cut snapping picked the *quietest* point → ~0.25 s dead air per edge (53.7 s script → 58 s) | cut at the first frame where sound reaches background level after the word / last before it; measured: extensions now match real word tails (Whisper ends words early) |
+| Animated stickers requested ("AI animations") | `anim`: shake / bounce / float / pulse (procedural, not generative AI — no image/video model available here) |
+| Thick, large captions up to 2 lines | `cap_max_words`, `cap_max_chars`, `stroke`, `stroke_color`; pink fill #FF2E8B |
+Style for this brand: pink #FF2E8B pop-up boxes + caption fill, black stroke, 9.5 % caption size; music "Fashion" (Arulo, Mixkit), drop at 18.28 s synced to "Nomi". App section (lines 4–11): captions + zooms only, no pop-ups (client will add screen recordings).
+Plan: `examples/plan_nomi.example.json`.
