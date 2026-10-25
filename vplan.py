@@ -239,16 +239,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     mode = st.get("caption_mode", "boxed")
     clean_mode = mode == "clean"
     if mode == "fill":
-        # no box: white words with a thin dark outline; the spoken word fills with the
-        # accent colour and gets a white outline so a dark fill stays readable on any background
-        ob = max(2, round(fs * 0.05))
+        # white words with a solid black stroke; the spoken word's fill turns the accent colour
+        ob = max(2, round(fs * 0.06))
         head = head.replace(
             f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,100,0,0,3,{round(fs * 0.22)},0,5,80,80,0,-1",
-            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H40000000,&H80000000,0,0,0,0,100,100,0,0,1,"
-            f"{ob},{max(1, round(fs * 0.04))},5,80,80,0,-1")
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,"
+            f"{ob},0,5,80,80,0,-1")
         fill = hex_to_ass(st.get("fill_color", st["accent"]))
-        hi_on = r"{\c" + fill + r"\3c&H00FFFFFF&\bord" + str(round(ob * 1.6)) + "}"
-        hi_off = r"{\c&H00FFFFFF&\3c&H40000000&\bord" + str(ob) + "}"
+        hi_on = r"{\c" + fill + "}"
+        hi_off = r"{\c&H00FFFFFF&}"
     if clean_mode:
         # no box, hard switch, colour by speaker: interviewer white + soft shadow,
         # interviewee neon text with a blurred glow (reference "vibe 2" colour code)

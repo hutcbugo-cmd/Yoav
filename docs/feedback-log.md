@@ -104,6 +104,8 @@ Open: client is not fully happy with the caption style in either version — nee
 ## Round 7 — v5 = v4 with the client's caption style
 
 Client direction: keep everything, same font and vibe, no green box; white text, each spoken word fills dark green (#183D32).
-New `caption_mode: "fill"`: white words with a thin dark outline; the spoken word gets the accent fill plus a white outline
-(dark green alone is unreadable on dark clothing). Same chunking, position and pop-in as v2. Plan: `examples/plan_v5.example.json`.
+New `caption_mode: "fill"`: white words with a solid black stroke; the spoken word's fill turns the accent colour,
+same black stroke. (First try added a white outline around the green word for contrast — client: "don't complicate it",
+no white wrap. Rule: implement the client's description literally first; propose extras separately.)
+Same chunking, position and pop-in as v2. Plan: `examples/plan_v5.example.json`.
 Default caption style for StreetUP from now on: `fill` with the brand's dark accent.
