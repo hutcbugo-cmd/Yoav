@@ -80,3 +80,17 @@ Found in QC and fixed in the pipeline:
 - Cut quality: median level at cuts −10.4 dB vs speech; 9/30 cuts still near speech level (words run together / street noise) — 40 ms fades.
 
 Open: the product photo's dial reads "poedagar" while the ad says L&P — client to confirm.
+
+## Round 5 — client: v2 was better than v3 (answers cut better, pace, composition, cuts)
+
+Root causes (my mistakes in v3, not tooling bugs):
+1. **Copied a statistic without its cause.** The references cut every 1–2 s because they are montages of *many people*; each cut is a new person. With one interviewee I imitated that rate by splitting single answers into 1 s sub-shots with alternating size — that chops a thought in the middle instead of cutting on meaning.
+2. **Overrode an explicit client instruction with a reference measurement.** Client asked for less headroom; v3 widened the frame again (face_top 0.13 → 0.22) because the references are wider.
+3. **Added a weak, hesitant answer** ("לא יודעת, נראה הכי טוב") to "build tension" — +5 s and slower pace (29.2 s → 34.7 s).
+4. **Effects applied uniformly** (4 % push-in on every shot, size change on every join) instead of only where they add meaning.
+
+Rules (apply to every future edit):
+- Client instructions beat reference statistics. References inform *style elements*; pacing comes from the content.
+- One shot per thought: cut between answers/ideas, not inside them. Size changes on cuts and on emphasis words only.
+- Only keep answers that are clear and confident; a hesitant answer needs a strong reason.
+- Baseline for StreetUP edits = v2 cutting, framing and pace (`examples/plan.example.json`).
