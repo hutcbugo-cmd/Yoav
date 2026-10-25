@@ -4,7 +4,7 @@
 
 | Feature | How |
 |---|---|
-| Transcription (Hebrew, word timings) | `faster-whisper` (`large-v3` by default) |
+| Transcription (Hebrew, word timings) | `faster-whisper` with ivrit.ai's Hebrew fine-tune (`ivrit-ai/whisper-large-v3-turbo-ct2`); each detected speech region is transcribed separately so no sentence is dropped |
 | Question / answer detection | sentence ends in `?` or opens with a question word (מה, למה, איך, האם…) |
 | Silence removal | cuts every pause longer than `--max-gap` (default 0.45 s), keeps `--pad` around words |
 | Mistake removal | fillers (אה, אמ, הממ…), stutters ("אני אני"), false starts (phrase restarted → keep the last take) |
@@ -19,9 +19,10 @@ sudo apt install ffmpeg          # needs libass + libfribidi (standard builds ha
 pip install -r requirements.txt
 ```
 
-The Whisper model downloads from **huggingface.co** on first use. In a sandbox
-whose network policy blocks that host, allow it, or copy a model directory in
-and pass `--model /path/to/faster-whisper-large-v3`.
+The Whisper model (~1.6 GB) downloads from Hugging Face on first use. In a
+sandbox with a network allowlist, allow `huggingface.co` **and** `*.hf.co`
+(the actual file downloads redirect to `us.aws.cdn.hf.co` / `*.xethub.hf.co`).
+Or copy a model directory in and pass `--model /path/to/model`.
 
 ## Usage (step by step)
 
@@ -49,8 +50,30 @@ frame width/height — set it to the subject's face), `--zoom 0.15`, `--no-zoom`
 `--font "DejaVu Sans"` (any installed font with Hebrew glyphs), `--height 1080`,
 `--crf 20`, `--preset medium`.
 
-## Known limits
+## Tested accuracy
 
+Measured on 8 real Hebrew recordings from Google FLEURS (dev split, different
+speakers, read speech, 1.5 s pauses between), against the reference text:
+
+| Model | Word error rate | Speed (4 CPU cores) |
+|---|---|---|
+| `ivrit-ai/whisper-large-v3-turbo-ct2` (default) | 19.8% | ~0.85× real time |
+
+Every sentence was transcribed, word timestamps were monotonic and none fell
+outside real speech. Part of the error rate is spelling variants the
+reference writes differently (המלים / המילים, על-ידי / על ידי).
+
+Things the test caught and fixed:
+- faster-whisper 1.2.1's audio decoder crashes with PyAV ≥ 15 → audio is now read directly.
+- Long-form decoding silently dropped whole sentences after pauses (2 of 8) →
+  each speech region is transcribed on its own, re-tried once if empty, and
+  any region still without words is **kept** in the edit rather than cut.
+- Whisper's "תודה רבה" hallucination on near-silence is filtered.
+
+## Known limits
+- A misrecognised word can turn a statement into a question (the test turned
+  "מים נשפכים…" into "מה משפחים…?"), so check the Q/A list `analyze` prints.
+- English words inside Hebrew sentences may be placed at the wrong end of the line.
 - Whisper tends to "clean up" speech, so some fillers and false starts never
   appear in the transcript and can't be cut; the prompt nudges it toward
   verbatim output but it's not guaranteed.

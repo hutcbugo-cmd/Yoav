@@ -54,24 +54,60 @@ def cmd_transcribe(a):
     os.makedirs(a.work, exist_ok=True)
     wav = os.path.join(a.work, "audio16k.wav")
     run(["ffmpeg", "-y", "-v", "error", "-i", a.video, "-vn", "-ac", "1", "-ar", "16000", wav])
+    from faster_whisper.vad import VadOptions, get_speech_timestamps
+    import numpy as np
+    import wave
     model = WhisperModel(a.model, device="auto", compute_type=a.compute_type)
-    # The prompt nudges Whisper toward verbatim output (keeping fillers / false starts)
-    # so the analyzer can find and remove them; Whisper otherwise "cleans" speech.
-    segments, info = model.transcribe(
-        wav, language=a.language, word_timestamps=True, beam_size=5, vad_filter=True,
-        vad_parameters={"min_silence_duration_ms": 300},
-        initial_prompt="אה, אמ... כן. אז, אממ, מה שרציתי להגיד זה... שאלה: מה דעתך?",
-        condition_on_previous_text=False)
-    out = {"language": info.language, "duration": info.duration, "segments": []}
-    for s in segments:
-        words = [{"w": w.word.strip(), "s": round(w.start, 3), "e": round(w.end, 3), "p": round(w.probability, 3)}
-                 for w in (s.words or []) if w.word.strip()]
-        out["segments"].append({"s": round(s.start, 3), "e": round(s.end, 3), "text": s.text.strip(), "words": words})
-        print(f"[{s.start:7.2f}-{s.end:7.2f}] {s.text.strip()}", file=sys.stderr)
+    # Decode the WAV ourselves: faster-whisper's own decoder (PyAV) breaks on av>=15
+    # ("unexpected keyword argument 'metadata_errors'"), and ffmpeg already resampled it.
+    with wave.open(wav, "rb") as f:
+        audio = np.frombuffer(f.readframes(f.getnframes()), np.int16).astype(np.float32) / 32768.0
+    sr = 16000
+    # Transcribe each speech region on its own. Long-form decoding (with or without
+    # faster-whisper's built-in VAD) silently dropped whole sentences that followed a
+    # pause inside the same 30 s window; in an editor, dropped words get cut as silence.
+    speech = get_speech_timestamps(audio, VadOptions(min_silence_duration_ms=300, speech_pad_ms=500))
+    out = {"language": a.language, "duration": len(audio) / sr, "model": a.model, "segments": [], "untranscribed": []}
+    for r in speech:
+        s0 = r["start"] / sr
+        got = []
+        # second attempt without the prompt, in case the prompt itself derails a short region
+        for prompt in (VERBATIM_PROMPT, None):
+            segs, _ = model.transcribe(audio[r["start"]:r["end"]], language=a.language, word_timestamps=True,
+                                       beam_size=5, initial_prompt=prompt, condition_on_previous_text=False)
+            got = [s for s in segs if not is_hallucination(s)]
+            if any(s.words for s in got):
+                break
+        for s in got:
+            words = [{"w": w.word.strip(), "s": round(w.start + s0, 3), "e": round(w.end + s0, 3),
+                      "p": round(w.probability, 3)} for w in (s.words or []) if w.word.strip()]
+            if words:
+                out["segments"].append({"s": round(s.start + s0, 3), "e": round(s.end + s0, 3),
+                                        "text": s.text.strip(), "words": words})
+                print(f"[{s.start + s0:7.2f}-{s.end + s0:7.2f}] {s.text.strip()}", file=sys.stderr)
+        if not any(s.words for s in got):
+            # speech the model couldn't transcribe: analyze keeps it rather than cutting it
+            out["untranscribed"].append({"s": round(s0, 3), "e": round(r["end"] / sr, 3)})
+            print(f"[{s0:7.2f}-{r['end'] / sr:7.2f}] (speech, no transcript - will be kept)", file=sys.stderr)
     path = os.path.join(a.work, "transcript.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
-    print(f"wrote {path}  ({len(out['segments'])} segments)")
+    print(f"wrote {path}  ({len(out['segments'])} segments, {len(speech)} speech regions, "
+          f"{len(out['untranscribed'])} untranscribed)")
+
+
+# The prompt nudges Whisper toward verbatim output (keeping fillers / false starts)
+# so the analyzer can find and remove them; Whisper otherwise "cleans" speech.
+VERBATIM_PROMPT = "אה, אמ... כן. אז, אממ, מה שרציתי להגיד זה... שאלה: מה דעתך?"
+# Whisper's stock outputs for noise / near-silence (subtitle credits leaked from training data)
+HALLUCINATIONS = ("תודה רבה", "תודה שצפיתם", "תודה על הצפייה", "כתוביות", "תרגום")
+
+
+def is_hallucination(seg):
+    text = seg.text.strip().strip(PUNCT).strip()
+    if any(text.startswith(h) for h in HALLUCINATIONS) and (seg.end - seg.start < 1.0 or seg.no_speech_prob > 0.5):
+        return True
+    return seg.no_speech_prob > 0.8 and seg.avg_logprob < -1.0
 
 
 # ---------------------------------------------------------------- analyze
@@ -151,6 +187,17 @@ def cmd_analyze(a):
                 s = keep[-1]["e"]
             keep.append({"s": s, "e": e, "block_type": blocks[w["block"]]["type"]})
     keep = [k for k in keep if k["e"] - k["s"] >= 0.25]
+    # never cut speech just because the model produced no words for it
+    for u in tr.get("untranscribed", []):
+        keep.append({"s": u["s"], "e": u["e"], "block_type": "answer", "untranscribed": True})
+    keep.sort(key=lambda k: k["s"])
+    merged = []
+    for k in keep:
+        if merged and k["s"] < merged[-1]["e"]:
+            merged[-1]["e"] = max(merged[-1]["e"], k["e"])
+        else:
+            merged.append(k)
+    keep = merged
     cuts = [{"w": w["w"], "s": w["s"], "e": w["e"], "reason": w["drop"]} for w in flat if w["drop"]]
     edl = {"source": os.path.abspath(a.video), "meta": meta, "keep": keep, "blocks": [
         {k: b[k] for k in ("type", "s", "e", "text")} for b in blocks], "words": flat, "cut_words": cuts}
@@ -222,7 +269,7 @@ def build_ass(edl, w, h, font):
     for i, wd in enumerate(words):
         max_words, max_chars = (12, 70) if wd["q"] else (4, 22)
         # don't strand the last word of a sentence alone on its own caption
-        last_of_sentence = wd["w"].endswith((".", "?", "!")) and len(cur) == max_words
+        last_of_sentence = wd["w"].endswith((".", "?", "!", ",")) and len(cur) == max_words
         if cur and ((len(cur) >= max_words and not last_of_sentence) or wd["s"] - cur[-1]["e"] > 0.6
                     or wd["q"] != cur[-1]["q"] or sum(len(x["w"]) for x in cur) > max_chars):
             chunks.append(cur)
