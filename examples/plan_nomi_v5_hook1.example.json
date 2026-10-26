@@ -1,0 +1,654 @@
+{
+ "source": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video3/raw.mp4",
+ "work": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video3/work",
+ "sfx_dir": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/sfx",
+ "style": {
+  "font": "Assistant ExtraBold",
+  "font_file": "/home/user/Yoav/assets/fonts/Assistant-800.ttf",
+  "caption_mode": "plain",
+  "fill_color": "#FF2E8B",
+  "stroke_color": "#000000",
+  "stroke": 0.07,
+  "caption_y": 0.7,
+  "caption_size": 0.14,
+  "cap_max_words": 6,
+  "cap_max_chars": 20,
+  "accent": "#FF2E8B",
+  "popup_size": 0.09,
+  "popup_y": 0.53,
+  "lufs": -14,
+  "dialog_rms": -20,
+  "sfx_gain_db": -3,
+  "caption_logos": {
+   "Nomi": "/home/user/Yoav/assets/brands/nomi/logo_icon.png"
+  }
+ },
+ "framing": {
+  "base_zoom": 1.225,
+  "face_top": 0.13,
+  "face_center_y": 0.25,
+  "track": true,
+  "roll_deg": 2.0,
+  "body_weight": 0.5
+ },
+ "clips": [
+  {
+   "s": 6.66,
+   "e": 12.45,
+   "zoom": 1.0,
+   "note": "HOOK: קרה לכם שהייתם צריכות תור ממש דחוף לציפורניים לפני אירוע חשוב ואף אחת לא הייתה פנויה?",
+   "punch_at": 8.9,
+   "punch_zoom": 1.12,
+   "drift": 0.03
+  },
+  {
+   "s": 26.19,
+   "e": 29.05,
+   "zoom": 1.2,
+   "note": "HOOK: או שסתם לא היה לכם כוח לצאת מהבית לטיפול ציפורניים?",
+   "drift": 0.03
+  },
+  {
+   "s": 112.0,
+   "e": 115.0,
+   "zoom": 1.0,
+   "note": "HOOK: אז בשביל זה בדיוק המצאנו את האפליקציה Nomi",
+   "punch_at": 114.84,
+   "punch_zoom": 1.22,
+   "drift": 0.03
+  },
+  {
+   "s": 122.91,
+   "e": 123.25,
+   "zoom": 1.2,
+   "note": "APP: את",
+   "drift": 0.03
+  },
+  {
+   "s": 124.13,
+   "e": 130.4,
+   "zoom": 1.2,
+   "note": "APP: נכנסת לאפליקציה, מוצאת את המניקוריסטית שאת רוצה לפי המרחק, הדירוג, ויכולה לראות את תיק העבודות שלה",
+   "drift": 0.03
+  },
+  {
+   "s": 143.2,
+   "e": 145.75,
+   "zoom": 1.0,
+   "note": "APP: את יכולה להתכתב איתה, לראות מתי היא פנויה,",
+   "drift": 0.03
+  },
+  {
+   "s": 147.04,
+   "e": 148.4,
+   "zoom": 1.2,
+   "note": "APP: לקבוע לפי מה שנוח לך,",
+   "drift": 0.03
+  },
+  {
+   "s": 148.6,
+   "e": 150.75,
+   "zoom": 1.0,
+   "note": "APP: וממש לשלוח לה את הדוגמה שאת רוצה.",
+   "drift": 0.03
+  },
+  {
+   "s": 166.89,
+   "e": 172.5,
+   "zoom": 1.0,
+   "note": "APP: בהזמנה את גם יכולה להגדיר איזה וייב את רוצה על הטיפול. טיפול שהוא קצת יותר שקט בשביל רגע לעצמך,",
+   "punch_at": 171.15,
+   "punch_zoom": 1.1,
+   "drift": 0.03
+  },
+  {
+   "s": 181.28,
+   "e": 183.9,
+   "zoom": 1.2,
+   "note": "APP: או טיפול שהוא קצת יותר כיפי, עם שיחה זורמת.",
+   "punch_at": 182.58,
+   "punch_zoom": 1.24,
+   "drift": 0.03
+  },
+  {
+   "s": 205.42,
+   "e": 209.45,
+   "zoom": 1.0,
+   "note": "APP: המניקוריסטיות כמובן מאומתות אצלנו, ואתם יכולים לראות לפי דירוגים.",
+   "punch_at": 206.96,
+   "punch_zoom": 1.12,
+   "drift": 0.03
+  },
+  {
+   "s": 272.27,
+   "e": 276.0,
+   "zoom": 1.2,
+   "note": "BIZ: ואם את מניקוריסטית, את יכולה להירשם כבעלת עסק ל-Nomi.",
+   "drift": 0.03
+  },
+  {
+   "s": 281.94,
+   "e": 284.75,
+   "zoom": 1.0,
+   "note": "BIZ: וככה למצוא לקוחות שגרים בסביבה שלך,",
+   "drift": 0.03
+  },
+  {
+   "s": 310.45,
+   "e": 315.2,
+   "zoom": 1.2,
+   "note": "BIZ: בלי לשווק את עצמך ובלי למצוא קליניקה, ממש נוחות מקסימלית.",
+   "drift": 0.03
+  },
+  {
+   "s": 360.43,
+   "e": 364.05,
+   "zoom": 1.0,
+   "note": "CTA: אז אני מזמינה את כל מי שאוהבת את עולם הביוטי להוריד את האפליקציה",
+   "drift": 0.03
+  },
+  {
+   "s": 412.08,
+   "e": 413.2,
+   "zoom": 1.2,
+   "note": "CTA: תורידו כאן את Nomi.",
+   "punch_at": 412.68,
+   "punch_zoom": 1.24,
+   "drift": 0.03
+  }
+ ],
+ "popups": [
+  {
+   "kind": "mg",
+   "preset": "slam",
+   "text": "דחוף!",
+   "emoji": "⏰",
+   "at": 8.9,
+   "dur": 0.85
+  },
+  {
+   "kind": "anim",
+   "name": "NailPainting",
+   "at": 8.72,
+   "params": {
+    "_speed": 1.7
+   },
+   "size": [
+    900,
+    900
+   ],
+   "w": 0.56,
+   "x": 0.74,
+   "y": 0.33,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "CalendarFull",
+   "at": 11.22,
+   "params": {
+    "x_end": 1.0,
+    "stamp_at": 1.0,
+    "hold": 0.5
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "HomeCozy",
+   "at": 27.12,
+   "params": {
+    "door_at": 0.6,
+    "hold": 0.9
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "LogoReveal",
+   "at": 114.54,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "hold": 0.0
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "SmartphoneAppReveal",
+   "at": 124.66,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "exit_at": 2.65,
+    "_timemap": [
+     [
+      0,
+      0
+     ],
+     [
+      0.75,
+      1.25
+     ],
+     [
+      1.1,
+      2.05
+     ],
+     [
+      1.4,
+      2.45
+     ],
+     [
+      3.95,
+      2.65
+     ],
+     [
+      4.4,
+      3.1
+     ]
+    ]
+   },
+   "size": [
+    900,
+    1500
+   ],
+   "w": 0.52,
+   "x": 0.73,
+   "y": 0.355,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "PortfolioGallery",
+   "at": 129.11,
+   "params": {
+    "hold": 0.4
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "SmartphoneAppReveal",
+   "at": 144.28,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "content_offset": 2.85,
+    "_timemap": [
+     [
+      0,
+      0
+     ],
+     [
+      0.95,
+      1.2
+     ],
+     [
+      3.65,
+      3.9
+     ],
+     [
+      4.1,
+      4.35
+     ]
+    ]
+   },
+   "size": [
+    900,
+    1500
+   ],
+   "w": 0.52,
+   "x": 0.73,
+   "y": 0.355,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "ChatSend",
+   "at": 149.83,
+   "params": {
+    "hold": 0.8
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "VibeToggle",
+   "at": 168.69,
+   "params": {
+    "quiet_at": 2.46,
+    "fun_at": 5.25,
+    "hold": 0.6
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "VerifiedStars",
+   "at": 206.44,
+   "params": {
+    "check_at": 0.45,
+    "stars_at": 2.7,
+    "hold": 0.0
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "BusinessSignup",
+   "at": 273.06,
+   "params": {
+    "type_at": 0.3,
+    "chips_at": 0.9,
+    "tap_at": 1.2,
+    "badge_at": 1.45,
+    "hold": 0.0
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "LogoReveal",
+   "at": 275.26,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "tagline": "לעסקים",
+    "hold": 0.2
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.39,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "MapCustomers",
+   "at": 283.01,
+   "params": {
+    "hold": 0.2
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "NoNeed",
+   "at": 311.13,
+   "params": {
+    "items": [
+     {
+      "icon": "megaphone",
+      "label": "שיווק",
+      "at": 0.34
+     },
+     {
+      "icon": "store",
+      "label": "קליניקה",
+      "at": 2.12
+     }
+    ],
+    "hold": 0.6
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.42,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "LogoReveal",
+   "at": 412.08,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "tagline": "הורידו עכשיו",
+    "hold": 1.2,
+    "exit": false
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.6,
+   "x": 0.69,
+   "y": 0.39,
+   "sfx_gain_db": -5
+  }
+ ],
+ "flashes": [
+  {
+   "at": 114.84,
+   "dur": 0.3
+  }
+ ],
+ "music": {
+  "file": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/m228.mp3",
+  "title": "Fashion — Arulo (Mixkit Stock Music Free License)",
+  "gain_db": -11,
+  "duck_ratio": 5,
+  "duck_threshold": 0.04,
+  "sections": [
+   {
+    "sync": {
+     "src": 114.84,
+     "track": 18.28
+    },
+    "fade_out": 1.0,
+    "note": "quiet intro under the hook; drop on 'Nomi'"
+   }
+  ]
+ },
+ "sfx": [
+  {
+   "name": "riser",
+   "at": 114.84,
+   "gain_db": -15,
+   "dur": 2.0,
+   "align": "peak",
+   "lead": 1.8
+  },
+  {
+   "name": "impact",
+   "at": 8.9,
+   "gain_db": -13,
+   "dur": 0.9,
+   "align": "peak",
+   "lead": 0.05
+  },
+  {
+   "name": "pop2",
+   "at": 8.9,
+   "gain_db": -12,
+   "dur": 0.4,
+   "align": "peak",
+   "lead": 0.2
+  },
+  {
+   "name": "whoosh2",
+   "at": 26.19,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 112.0,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 122.91,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 124.13,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 143.2,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 147.04,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 148.6,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 166.89,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 181.28,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 205.42,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 272.27,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 281.94,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 310.45,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh",
+   "at": 360.43,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 412.08,
+   "gain_db": -22,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  }
+ ]
+}

@@ -3,6 +3,8 @@
 // -> pick a date and time -> "book" -> confirmation tick with confetti. The screen is real HTML
 // (Hebrew, RTL) rendered by Chromium, so text is crisp and every element can be animated.
 // params: brand, accent, query, techs [{name, rating, km, colors}], date, time, exit,
+//         content_offset (start the screen flow later: phone enters already on e.g. the profile),
+//         exit_at (screen-flow time at which the phone leaves; split the flow across two shots),
 //         logo (optional image path under the repo, replaces the text logo)
 import { seg, lerp, clamp, easeOutBack, easeInBack, easeOutCubic, easeInOutCubic, spring, shade }
   from "./ease.js";
@@ -226,28 +228,35 @@ export default {
       { t: 3.45, name: "sparkle", gain: -10 },
       { t: 4.05, name: "click", gain: -6 }, { t: 4.55, name: "click", gain: -6 },
       { t: 5.05, name: "click", gain: -4 }, { t: 5.3, name: "pop", gain: -3 }, { t: 5.42, name: "sparkle", gain: -2 },
-      ...(p.exit ? [{ t: 6.75, name: "whoosh", gain: -8 }] : []),
     ];
-    return { duration: p.exit ? 7.2 : 6.8, sfx };
+    // the screen flow runs on content time c = t + content_offset; the phone itself enters at t = 0
+    const off = p.content_offset || 0, ex = p.exit_at ?? 6.75;
+    p.off = off; p.ex = ex;
+    const end = p.exit ? ex + 0.45 : 6.8;
+    const kept = sfx.filter((c) => c.t >= off && c.t < (p.exit ? ex : end)).map((c) => ({ ...c, t: c.t - off }));
+    if (off > 0) kept.unshift({ t: 0.0, name: "whoosh", gain: -4 });
+    if (p.exit) kept.push({ t: ex - off, name: "whoosh", gain: -8 });
+    return { duration: end - off, sfx: kept };
   },
 
-  async frame(t) {
+  async frame(tIn) {
     const s = S, u = s.u, A = s.p.accent;
+    const t = tIn + s.p.off;  // content time; the entrance below uses tIn
     // phone entrance: swings in from below-left with a spring; idle float; exit flip away
-    const kin = seg(t, 0, 0.85), sp = spring(kin, 1.6, 6);
+    const kin = seg(tIn, 0, 0.85), sp = spring(kin, 1.6, 6);
     let ry = lerp(-78, 0, sp), rx = lerp(24, 0, sp), rz = lerp(-10, 0, sp), ty = lerp(0.55, 0, easeOutCubic(kin));
     let sc = lerp(0.6, 1, easeOutBack(kin, 1.4));
-    ry += 5 * Math.sin(t * 1.1) * seg(t, 0.8, 1.6); rx += 2.5 * Math.sin(t * 0.8 + 1) * seg(t, 0.8, 1.6);
+    ry += 5 * Math.sin(tIn * 1.1) * seg(tIn, 0.8, 1.6); rx += 2.5 * Math.sin(tIn * 0.8 + 1) * seg(tIn, 0.8, 1.6);
     if (s.p.exit) {
-      const ke = easeInBack(seg(t, 6.75, 7.2), 1.5);
+      const ke = easeInBack(seg(t, s.p.ex, s.p.ex + 0.45), 1.5);
       ry += 70 * ke; ty -= 0.25 * ke; sc *= 1 - 0.5 * ke;
     }
-    const op = clamp(kin * 4) * (s.p.exit ? 1 - seg(t, 7.05, 7.2) : 1);
+    const op = clamp(kin * 4) * (s.p.exit ? 1 - seg(t, s.p.ex + 0.3, s.p.ex + 0.45) : 1);
     s.phone.style.transform = `translateY(${ty * s.H}px) scale(${sc}) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
     s.phone.style.opacity = op;
     s.shadow.style.opacity = op * clamp(1 - Math.abs(ry) / 60);
     s.shadow.style.transform = `scaleX(${sc})`;
-    s.glare.style.backgroundPosition = `${lerp(110, -10, easeInOutCubic(seg(t, 0.2, 1.3)))}% 0`;
+    s.glare.style.backgroundPosition = `${lerp(110, -10, easeInOutCubic(seg(tIn, 0.2, 1.3)))}% 0`;
 
     // splash: logo pops, then the splash slides up to reveal the app
     const lk = seg(t, 0.35, 0.8);

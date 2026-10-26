@@ -648,6 +648,8 @@ def main():
         vlast = f"vcl{k}"
         n_in += 1
     anim_cues = []  # sound cues returned by vanim animations (output-timeline seconds)
+    anim_boxes = []  # (name, t0, t1, rect) for the layout check
+    fs_cap = W * st.get("caption_size", 0.068)
     for k, pu in enumerate(plan.get("popups", [])):
         if pu.get("kind") == "anim":  # vanim engine: three.js / HTML / SVG animation with alpha
             import vanim
@@ -669,6 +671,17 @@ def main():
             n_in += 1
             if pu.get("sfx", True):
                 anim_cues += vanim.sfx_cues(info, t0, plan["sfx_dir"], work, pu.get("sfx_gain_db", -10))
+            # layout rules (client: never on the captions, never on top of each other)
+            cx = W * pu["x"] if "x" in pu else W / 2
+            rect = (cx - ow / 2, py - oh / 2, cx + ow / 2, py + oh / 2)
+            cap_top = H * st.get("caption_y", 0.70) - fs_cap * (st.get("line_spacing", 0.78) / 2 + 0.45)
+            if rect[3] > cap_top:
+                report.append(f"WARNING anim {pu['name']} at {t0:.2f}s reaches y={rect[3] / H:.2f}H, "
+                              f"caption band starts {cap_top / H:.2f}H")
+            for (n0, a0, a1, r0) in anim_boxes:
+                if t0 < a1 - 0.05 and a0 < t0 + dur - 0.05 and rect[0] < r0[2] and r0[0] < rect[2] and rect[1] < r0[3] and r0[1] < rect[3]:
+                    report.append(f"WARNING anim {pu['name']} ({t0:.2f}-{t0 + dur:.2f}s) overlaps {n0} ({a0:.2f}-{a1:.2f}s)")
+            anim_boxes.append((pu["name"], t0, t0 + dur, rect))
             continue
         if pu.get("kind") == "mg":  # frame-by-frame motion graphics (vmotion.py)
             import vmotion
@@ -804,7 +817,8 @@ def main():
     graph.append(f"{''.join(mix)}amix=inputs={len(mix)}:normalize=0:duration=first,"
                  f"loudnorm=I={st.get('lufs', -14)}:TP=-1.5:LRA=11,aresample=48000,"
                  # loudnorm alone let a Nomi render peak at 0.0 dBFS; a final limiter holds -1.5 dBFS
-                 f"alimiter=limit=0.84:attack=2:release=50:level=false[aout]")
+                 # -3 dBFS: at -1.5 the AAC encode of a dense SFX mix produced +1.0 dBTP inter-sample overs
+                 f"alimiter=limit=0.708:attack=2:release=50:level=false[aout]")
     if a.draft:  # quick look: half resolution, fastest encode (~2x faster end to end)
         graph.append(f"[{vlast}]scale=trunc(iw/4)*2:-2[vdraft]")
         vlast = "vdraft"

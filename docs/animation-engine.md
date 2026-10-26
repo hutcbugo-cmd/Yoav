@@ -44,7 +44,16 @@ info.json {w, h, fps, n, duration, sfx: [{t, name, gain}]}
 | VerifiedStars | shield flip, tick draws, "verified" pill, stars fill, score counts up | built |
 | MapCustomers | map tilts in, pin drops with ripples, customers pop and link, count pill | built |
 | NoNeed | icon cards slashed red on their words, grey out | built |
+| PortfolioGallery | stack of manicure photo cards (french, ombre, glitter, red, dots) fans out, browsed, favourite lifts with a heart | built (Nomi v5) |
+| BusinessSignup | sign-up card: business name types, service chips, button tap, "בעלת עסק" badge stamp + confetti | built (Nomi v5) |
 | CoinBurst, BeautyTransformation, ProductPopUp | same contract | next |
+
+SmartphoneAppReveal `content_offset` / `exit_at` split one screen flow across two shots, so another animation
+(the portfolio) can take the slot in between.
+
+Layout rules (client): an animation never sits on the captions or on another animation. `vplan` warns when an
+`anim` rectangle reaches the caption band or overlaps another `anim` in time and space. Defaults: square
+overlays w 0.6 at y 0.42 (bottom 0.59 H), phone w 0.52 at y 0.355.
 
 Timing: `_speed` and `_timemap` ([[out_t, anim_t], …]) retime any module so its beats land on words.
 `vplan.py plan.json --dry` prints every word's output time; `examples/build_nomi_v4.example.py` turns

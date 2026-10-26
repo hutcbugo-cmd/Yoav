@@ -44,6 +44,9 @@ export const ICONS = {
   person: `<circle cx="12" cy="8" r="4.2"/><path d="M3.5 21a8.5 8 0 0 1 17 0z"/>`,
   pin: `<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.6" fill="#fff"/>`,
   shield: `<path d="M12 2l8 3v6c0 5.2-3.4 9.4-8 11-4.6-1.6-8-5.8-8-11V5z"/>`,
+  briefcase: `<path d="M9 4h6a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3V6a2 2 0 0 1 2-2zm0 2v1h6V6z"/>`,
+  crown: `<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>`,
+  heart: `<path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/>`,
 };
 export const icon = (name, size, color) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}"
   style="color:${color};fill:${color};display:block">${ICONS[name]}</svg>`;

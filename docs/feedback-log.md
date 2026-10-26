@@ -202,3 +202,11 @@ Rules: place overlays from QC frames, not from numbers. Taglines must clear the 
   row out right-to-left by hand. libass sizes a font by ascent+descent, so 1 em = 0.7645 × the ASS size for
   Assistant; measured rendered width 642 px vs Pillow 853 px. Prefixes stay glued ("עסק ל-[logo]").
   Logo windows end strictly before the next caption (the first try showed one stale frame).
+
+## Round 15 — Nomi v5 hook 1 ("animations are amazing; not on the captions, not on each other")
+| Client note | Root cause | Fix | Result |
+|---|---|---|---|
+| Add an animation for "תיק העבודות" showing manicure examples | phone showed only a small gallery | PortfolioGallery; phone split into two shots around it (`content_offset`, `exit_at`) | portfolio 17.95–20.4 s, phone before and after |
+| Add an animation for "אם את מניקוריסטית… בעלת עסק" | none there | BusinessSignup (type, chips, tap, badge), handing over to the "לעסקים" logo | — |
+| Animations sit on the captions / on each other | placement by eye, bottoms at 0.62 H, back-to-back cues overlapping during exits | everything above 0.60 H; vplan layout + overlap warnings; cues re-timed so each starts when the previous has left | 0 warnings |
+| (found in QC) true peak +1.0 dBTP | limiter at −1.5 dBFS + AAC encode of a dense SFX mix → inter-sample overs | final limiter −3 dBFS | −14.0 LUFS, −1.8 dBTP |
