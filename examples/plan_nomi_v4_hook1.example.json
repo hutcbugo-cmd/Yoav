@@ -18,7 +18,10 @@
   "popup_y": 0.53,
   "lufs": -14,
   "dialog_rms": -20,
-  "sfx_gain_db": -3
+  "sfx_gain_db": -3,
+  "caption_logos": {
+   "Nomi": "/home/user/Yoav/assets/brands/nomi/logo_icon.png"
+  }
  },
  "framing": {
   "base_zoom": 1.225,

@@ -34,6 +34,7 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
   GrabCut + flat-background removal, lower strap faded (see Round 4 in the feedback log). Ask the client to re-send it.
 
 ## Brand assets
-- Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Pass it to vanim as
+- Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Client rule: the word
+  "Nomi" is always shown as the logo (`style.caption_logos`), never as plain text. Pass it to vanim as
   `"logo": "assets/brands/nomi/logo_icon.png"` (SmartphoneAppReveal splash + header).
 - Animation engine: `docs/animation-engine.md` (`vanim/`, `vanim.py`, pop-up kind `anim`).

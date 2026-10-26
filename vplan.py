@@ -275,6 +275,20 @@ def render_box(text, emoji, path, style, W):
     return img.size
 
 
+def caption_logo_png(src, size, out):
+    """Logo scaled to caption size with the captions' soft drop shadow, on a padded canvas."""
+    from PIL import Image, ImageFilter
+    lg = Image.open(src).convert("RGBA")
+    lg = lg.resize((size, round(size * lg.height / lg.width)), Image.LANCZOS)
+    pad = max(4, size // 8)
+    can = Image.new("RGBA", (lg.width + 2 * pad, lg.height + 2 * pad), (0, 0, 0, 0))
+    sh = Image.new("RGBA", can.size, (0, 0, 0, 0))
+    sh.paste((0, 0, 0, 110), (pad, pad + max(2, size // 25)), lg.split()[3])
+    can = Image.alpha_composite(can, sh.filter(ImageFilter.GaussianBlur(size / 30)))
+    can.alpha_composite(lg, (pad, pad))
+    can.save(out)
+
+
 # ---------------------------------------------------------------- captions
 def split_lines(words, font, max_w):
     """One line if it fits, else the two-line split with the narrowest wider line."""
@@ -284,6 +298,29 @@ def split_lines(words, font, max_w):
     k = min(range(1, len(words)), key=lambda k: max(font.getlength(" ".join(words[:k])),
                                                     font.getlength(" ".join(words[k:]))))
     return [words[:k], words[k:]]
+
+
+def logo_segments(row, logos):
+    """Split a caption row into [("t", text) | ("logo", file)] when a word is a brand with a logo
+    ("Nomi", "Nomi.", "ל-Nomi" -> "ל-" + logo). None when the row has no brand word."""
+    segs, cur, hit = [], [], False
+    for wd in row:
+        bare = wd.rstrip(".,?!")
+        brand = next((b for b in logos if bare.endswith(b)), None)
+        if brand is None:
+            cur.append(wd)
+            continue
+        hit = True
+        pre = bare[: -len(brand)]
+        if pre:
+            cur.append(pre)
+        if cur:
+            segs.append(("t", " ".join(cur)))
+        cur = []
+        segs.append(("logo", logos[brand]))
+    if cur:
+        segs.append(("t", " ".join(cur)))
+    return segs if hit else None
 
 
 def build_captions(plan, words_by_clip, offsets, W, H):
@@ -316,6 +353,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         hi_on = hi_off = ""
         from PIL import ImageFont
         plain_font = ImageFont.truetype(st["font_file"], fs)
+        # libass scales a font so ascent+descent = font size; Pillow sizes the em. This font's
+        # em is 0.7645 of the ASS size (measured: rendered width 642 px = Pillow 853 x 0.76)
+        from fontTools.ttLib import TTFont
+        tt = TTFont(st["font_file"])
+        em = tt["head"].unitsPerEm / (tt["hhea"].ascent - tt["hhea"].descent)
+        ass_font = ImageFont.truetype(st["font_file"], max(1, round(fs * em)))
+        space = ass_font.getlength(" ")
+        logos = st.get("caption_logos", {})  # {"Nomi": "assets/brands/nomi/logo_icon.png"}
+        logo_px = round(fs * st.get("caption_logo_size", 0.82))
     if mode == "fill":
         # white words with a solid black stroke; the spoken word's fill turns the accent colour
         ob = max(2, round(fs * st.get("stroke", 0.06)))
@@ -386,8 +432,25 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     gap = round(fs * st.get("line_spacing", 0.78))
                     for r, row in enumerate(rows):
                         ry = y + round((r - (len(rows) - 1) / 2) * gap)
-                        lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(end)},Cap,,0,0,0,,"
-                                     f"{{\\an5\\pos({W // 2},{ry})}}{{\\blur2}}{' '.join(row)}")
+                        segs = logo_segments(row, logos)
+                        if not segs:
+                            lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(end)},Cap,,0,0,0,,"
+                                         f"{{\\an5\\pos({W // 2},{ry})}}{{\\blur2}}{' '.join(row)}")
+                            continue
+                        # brand word -> its logo: lay the row out right-to-left by hand, text runs
+                        # as separate events, the logo as an image overlay in the gap
+                        widths = [logo_px if k == "logo" else ass_font.getlength(v) for k, v in segs]
+                        seps = [space * (0.25 if k == "t" and v.endswith("-") else 1) for k, v in segs[:-1]]
+                        xr = W / 2 + (sum(widths) + sum(seps)) / 2
+                        for j, ((k, v), wd) in enumerate(zip(segs, widths)):
+                            cx = round(xr - wd / 2)
+                            if k == "logo":
+                                plan.setdefault("_caption_logos", []).append(
+                                    {"file": v, "t0": s, "t1": end, "x": cx, "y": ry, "size": logo_px})
+                            else:
+                                lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(end)},Cap,,0,0,0,,"
+                                             f"{{\\an5\\pos({cx},{ry})}}{{\\blur2}}{v}")
+                            xr -= wd + (seps[j] if j < len(seps) else 0)
                     continue
                 elif mode == "fill":
                     txt = " ".join((hi_on + t + hi_off) if j == i else t for j, t in enumerate(clean))
@@ -574,6 +637,16 @@ def main():
     graph.append(f"[{vlast}]ass='{ass}':fontsdir='{fontsdir}'[vs]")
     vlast = "vs"
     n_in = len(clips)
+    for k, lg in enumerate(plan.get("_caption_logos", [])):  # brand logos inside captions
+        png = os.path.join(work, f"caplogo_{lg['size']}.png")
+        if not os.path.exists(png):
+            caption_logo_png(lg["file"], lg["size"], png)
+        inputs += ["-loop", "1", "-t", f"{lg['t1'] - lg['t0'] + 0.1:.3f}", "-i", png]
+        graph.append(f"[{n_in}:v]format=rgba,setpts=PTS-STARTPTS+{lg['t0']:.3f}/TB[cl{k}]")
+        graph.append(f"[{vlast}][cl{k}]overlay=x={lg['x']}-w/2:y={lg['y']}-h/2:eof_action=pass:"
+                     f"enable='gte(t,{lg['t0']:.3f})*lt(t,{lg['t1']:.3f})'[vcl{k}]")  # the next caption starts at t1
+        vlast = f"vcl{k}"
+        n_in += 1
     anim_cues = []  # sound cues returned by vanim animations (output-timeline seconds)
     for k, pu in enumerate(plan.get("popups", [])):
         if pu.get("kind") == "anim":  # vanim engine: three.js / HTML / SVG animation with alpha

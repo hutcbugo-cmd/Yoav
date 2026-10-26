@@ -197,3 +197,8 @@ Rule: never call procedural output "AI-generated".
 | More animations like the demos on key moments | — | 12 animation cues, each locked to a word with `_timemap`: nail paint, calendar X's, house, logo, phone booking flow (retimed to her sentence), chat photo, vibe switch, verified + stars, map, crossed-out icons, end logo | — |
 | How to make the tool faster | 4-core CPU, no GPU; whole-source levelling (once, ~12 min) | animation cache, 4 browser workers for HTML (1.4×), 3D supersample 1.25 (−30 %), `--dry` timing, `--draft` half-res preview (≈1.7× faster) | full 55 s hook re-render ≈2 min after the first |
 Rules: place overlays from QC frames, not from numbers. Taglines must clear the caption band (≈0.62 H), and nothing may cross the frame edge.
+- Round 14b: "when she says Nomi, put the Nomi logo, don't just write Nomi" → `style.caption_logos`
+  {"Nomi": icon}: the brand word in a caption is replaced by the logo image, placed in the gap by laying the
+  row out right-to-left by hand. libass sizes a font by ascent+descent, so 1 em = 0.7645 × the ASS size for
+  Assistant; measured rendered width 642 px vs Pillow 853 px. Prefixes stay glued ("עסק ל-[logo]").
+  Logo windows end strictly before the next caption (the first try showed one stale frame).

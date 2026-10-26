@@ -36,6 +36,7 @@ drop = {("whoosh2", 11.1), ("click", 11.4), ("sparkle", 114.84), ("pop2", 114.84
         ("pop", 311.47), ("pop", 312.89), ("pop2", 412.08), ("click", 412.53)}
 p['sfx'] = [s for s in p['sfx'] if (s['name'], s['at']) not in drop]
 p['style']['sfx_gain_db'] = -3
+p['style']['caption_logos'] = {'Nomi': '/home/user/Yoav/' + LOGO}  # the word "Nomi" shows as the logo
 json.dump(p, open('plan_v4_hook1.json', 'w'), ensure_ascii=False, indent=1)
 for q in p['popups']: print(q.get('name', q.get('preset')), q['at'])
 print(len(p['sfx']), 'sfx')
