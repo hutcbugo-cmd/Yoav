@@ -150,3 +150,14 @@ Plan: `examples/plan_nomi.example.json`.
   Rule: sync music drops / flashes to the audio onset of the word, not the ASR start time.
   Punch-ins capped at ~1.6× total magnification (1.72× visibly softened 1080p).
 - Round 10c: hook-2 render peaked at 0.0 dBFS despite loudnorm TP=-1.5 → final alimiter at -1.5 dBFS in every render.
+
+## Round 11 — Nomi v2 (client: "fine, only fine")
+
+| Client note | Root cause (measured) | Fix in the pipeline | Result |
+|---|---|---|---|
+| "והיא תגיע אלייך" — she isn't looking at the camera | Content choice | Clip removed; rule: drop takes where the presenter looks away | — |
+| She sits on the side, cut-zooms/zooms not centred | Static per-clip median crop (face >6 % off-centre in 22 % of frames); and during punch-ins crop used the stale configured `iw`, sliding the face 6–9 % | Smoothed per-frame face tracking (`face_track_expr`); crop position computed from the zoom expression; zooms anchored on the face centre (`face_center_y`) | 0 % of frames off-centre, face height on screen steady 24–27 % (both hooks) |
+| Emoji-only pop-ups are cringe; text pop-ups work; wanted more invested animation | Static PNG + generic scale-pop | Emoji-only pop-ups removed. New `vmotion.py`: frame-by-frame motion graphics (slam, stamp_x with drawn X, building chips list, letter-by-letter logo with sparkle burst, CTA button with bouncing arrow) | — |
+| "AI animations" | No GPU; open generative models are CPU-infeasible or non-commercial licensed | Procedural motion graphics instead (told the client plainly) | — |
+| Music weak, not enough sounds, not enough to keep watching | Music −12 dB with heavy ducking; SFX only on pop-ups | Music −7 dB, ducking ratio 3; whoosh on every real cut, impacts/clicks/pops per animation (27 SFX); spoken-word pop 108 %; 3 % drift on every shot; business section gets a text list | — |
+Rules: text-only pop-ups for this client (emoji may sit inside a text pill); measure framing on the rendered output, not just the plan.

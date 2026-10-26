@@ -51,6 +51,29 @@ def track_faces(src, meta, cache, fps=4):
     return out
 
 
+def face_track_expr(faces, s, e, fallback):
+    """Piecewise-linear ffmpeg expression of the smoothed face x-centre over clip time t."""
+    pts = [(f[0] - s, f[1]) for f in faces if s - 0.3 <= f[0] <= e + 0.3]
+    if len(pts) < 3:
+        return f"{fallback:.4f}"
+    t = np.array([p[0] for p in pts])
+    x = np.array([p[1] for p in pts])
+    # median-of-3 then exponential smoothing (forward + backward, no lag) so the frame glides
+    xm = np.array([np.median(x[max(0, i - 1):i + 2]) for i in range(len(x))])
+    a = 0.35
+    fw = xm.copy()
+    for i in range(1, len(fw)):
+        fw[i] = a * xm[i] + (1 - a) * fw[i - 1]
+    bw = fw.copy()
+    for i in range(len(bw) - 2, -1, -1):
+        bw[i] = a * fw[i] + (1 - a) * bw[i + 1]
+    keys = list(zip(t, bw))
+    expr = f"{keys[-1][1]:.4f}"
+    for (t0, x0), (t1, x1) in reversed(list(zip(keys, keys[1:]))):
+        expr = (f"if(lt(t,{t1:.3f}),{x0:.4f}+({x1 - x0:.4f})*(t-{t0:.3f})/{max(t1 - t0, 1e-3):.3f},{expr})")
+    return f"if(lt(t,{keys[0][0]:.3f}),{keys[0][1]:.4f},{expr})"
+
+
 def clip_face(faces, s, e):
     pts = [f for f in faces if s - 0.25 <= f[0] <= e + 0.25]
     if not pts:
@@ -247,8 +270,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{stroke},&H80000000,0,0,0,0,100,100,0,0,1,"
             f"{ob},{round(ob * st.get('shadow', 0))},5,90,90,0,-1")
         fill = hex_to_ass(st.get("fill_color", st["accent"]))
-        hi_on = r"{\c" + fill + "}"
-        hi_off = r"{\c&H00FFFFFF&}"
+        pop_pct = st.get("word_pop", 100)  # spoken word slightly larger
+        hi_on = r"{\c" + fill + rf"\fscx{pop_pct}\fscy{pop_pct}" + "}"
+        hi_off = r"{\c&H00FFFFFF&\fscx100\fscy100}"
     if clean_mode:
         # no box, hard switch, colour by speaker: interviewer white + soft shadow,
         # interviewee neon text with a blurred glow (reference "vibe 2" colour code)
@@ -409,10 +433,21 @@ def main():
             z = f"({z0:.4f}+({z1 - z0:.4f})*(3*pow({prog},2)-2*pow({prog},3)))*(1+{drift:.4f}*t/{d:.3f})"
             scale = f"scale=w='2*trunc({W}*{z}/2)':h='2*trunc({H}*{z}/2)':eval=frame:flags=bicubic"
         else:
+            z = f"{z0:.4f}"
             scale = f"scale={2 * round(W * z0 / 2)}:{2 * round(H * z0 / 2)}:flags=bicubic"
-        # keep the face centred horizontally and its top at face_top of the output height
-        x = f"min(max({fc['cx']:.4f}*iw-{W / 2},0),iw-{W})"
-        y = f"min(max({fc['top']:.4f}*ih-{face_top * H:.1f},0),ih-{H})"
+        # follow the face: smoothed per-frame horizontal centre (a per-clip median left her
+        # >6 % off-centre in 22 % of frames), and anchor zooms on the face centre so a
+        # punch-in grows around her face instead of around the top of the frame
+        cx_expr = face_track_expr(faces, c["s"], c["e"], fc["cx"]) if plan.get("framing", {}).get("track", True) \
+            else f"{fc['cx']:.4f}"
+        face_cy = fc["top"] + fc["h"] / 2
+        target_cy = plan.get("framing", {}).get("face_center_y", face_top + fc["h"] * base / 2)
+        # positions come from the zoom expression itself, not iw/ih: crop keeps the frame
+        # size it was configured with, so during a punch-in iw was stale and the face
+        # slid 6-9 % off-centre (measured on the punch clips only)
+        zw, zh = f"(2*trunc({W}*{z}/2))", f"(2*trunc({H}*{z}/2))"
+        x = f"min(max(({cx_expr})*{zw}-{W / 2},0),{zw}-{W})"
+        y = f"min(max({face_cy:.4f}*{zh}-{target_cy * H:.1f},0),{zh}-{H})"
         vparts.append(f"[{i}:v]trim=duration={d:.4f},setpts=PTS-STARTPTS,{scale},"
                       f"crop={W}:{H}:x='{x}':y='{y}',setsar=1,fps={meta['fps']:.5f}[v{i}]")
         # level each clip's dialogue to a common RMS so interviewer / interviewee match
@@ -456,6 +491,25 @@ def main():
     vlast = "vs"
     n_in = len(clips)
     for k, pu in enumerate(plan.get("popups", [])):
+        if pu.get("kind") == "mg":  # frame-by-frame motion graphics (vmotion.py)
+            import vmotion
+            t0 = out_t(pu["at"])
+            spec = dict(pu)
+            if "items" in spec:  # item cues are source times -> seconds after the pop-up starts
+                spec["items"] = [dict(it, t=max(0.0, out_t(it["at"]) - t0)) for it in pu["items"]]
+            fdir, mw, mh, nf = vmotion.render(spec, st, W, meta["fps"], os.path.join(work, f"mg_{k}"))
+            dur = nf / meta["fps"]
+            inputs += ["-framerate", f"{meta['fps']:.5f}", "-i", os.path.join(fdir, "%04d.png")]
+            py = round(H * pu.get("y", st.get("popup_y", 0.53)))
+            if "y" not in pu and "x" not in pu:
+                py = place_clear_of_face(pu["at"], py, mh, mw, clips, faces, base, face_top, W, H, st)
+            px = f"{round(W * pu['x'])}-w/2" if "x" in pu else "(W-w)/2"
+            graph.append(f"[{n_in}:v]format=rgba,setpts=PTS-STARTPTS+{t0:.3f}/TB[p{k}]")
+            graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2':eof_action=pass:"
+                         f"enable='between(t,{t0:.3f},{t0 + dur:.3f})'[vp{k}]")
+            vlast = f"vp{k}"
+            n_in += 1
+            continue
         png = os.path.join(work, f"popup_{k}.png")
         pw, ph = render_popup(pu, png, st, W, H)
         grow = 1.12 * (1.07 if pu.get("anim") == "pulse" else 1.0) + 0.01  # pop overshoot (+ pulse)
