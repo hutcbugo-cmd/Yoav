@@ -210,3 +210,7 @@ Rules: place overlays from QC frames, not from numbers. Taglines must clear the 
 | Add an animation for "אם את מניקוריסטית… בעלת עסק" | none there | BusinessSignup (type, chips, tap, badge), handing over to the "לעסקים" logo | — |
 | Animations sit on the captions / on each other | placement by eye, bottoms at 0.62 H, back-to-back cues overlapping during exits | everything above 0.60 H; vplan layout + overlap warnings; cues re-timed so each starts when the previous has left | 0 warnings |
 | (found in QC) true peak +1.0 dBTP | limiter at −1.5 dBFS + AAC encode of a dense SFX mix → inter-sample overs | final limiter −3 dBFS | −14.0 LUFS, −1.8 dBTP |
+- Round 15b: "better to use real examples, exactly like this" (client sent 3 manicure photos) → PortfolioGallery
+  `photos` [{src, pos}] (bigger cards, object-position keeps the nails in frame) and ChatSend `photo`. Rule: when
+  the client has real product/work photos, use them instead of drawn stand-ins. Photos sit in
+  `assets/brands/nomi/portfolio/`, git-ignored until their usage rights are confirmed.

@@ -1,7 +1,8 @@
 // PortfolioGallery ("see her portfolio"): a stack of photo cards of finished manicures fans out like
 // a hand of cards, the gallery is browsed card by card, and the favourite lifts forward with a heart.
 // Each card shows three fingers with a different design (french, ombre, glitter, classic red, dots).
-// params: accent, title, designs [...], focus (index), hold, exit
+// params: accent, title, designs [...], photos [{src, pos}] (real work photos replace the drawn designs),
+//         focus (index), hold, exit
 import { seg, lerp, clamp, easeOutBack, easeInBack, easeOutCubic, easeInOutCubic, spring, sparkle } from "./ease.js";
 import { el, stage, pill, icon, canvasLayer } from "./ui.js";
 
@@ -37,12 +38,17 @@ export default {
     const st = stage(root, W, H);
     const head = el("div", `position:absolute;left:50%;top:${4 * u}px;white-space:nowrap;display:flex;align-items:center;
       gap:${2 * u}px;${pill(u, p.accent)}`, `${icon("heart", 5.5 * u, "#fff")}<span>${p.title}</span>`);
-    const cw = 30 * u, ch = 40 * u;
-    const cards = p.designs.map((d, i) => {
+    const real = (p.photos || []).length > 0;
+    const items = real ? p.photos : p.designs;
+    if (real && params.focus === undefined) p.focus = Math.floor((items.length - 1) / 2);
+    const cw = (real ? 34 : 30) * u, ch = (real ? 45 : 40) * u;
+    const cards = items.map((d, i) => {
       const c = el("div", `position:absolute;left:${(W - cw) / 2}px;top:${H * 0.52 - ch / 2}px;width:${cw}px;height:${ch}px;
         background:#fff;border-radius:${3 * u}px;padding:${1.6 * u}px;box-sizing:border-box;transform-origin:50% 120%;
         box-shadow:0 ${1.4 * u}px ${4 * u}px rgba(90,15,51,.3)`);
-      const ph = el("div", `height:${31 * u}px;border-radius:${2 * u}px;overflow:hidden`, hand(d, u));
+      const ph = el("div", `height:${ch - 9 * u}px;border-radius:${2 * u}px;overflow:hidden`, real
+        ? `<img src="/${d.src}" style="width:100%;height:100%;object-fit:cover;object-position:${d.pos || "50% 50%"};display:block">`
+        : hand(d, u));
       const meta = el("div", `display:flex;align-items:center;gap:${1 * u}px;font:800 ${3.6 * u}px Assistant;color:#8a6b78;
         padding:${1 * u}px ${0.6 * u}px 0;direction:ltr`, `${icon("heart", 3.6 * u, p.accent)}<span>${p.likes[i % p.likes.length]}</span>`);
       c.append(ph, meta);
@@ -52,7 +58,7 @@ export default {
     st.append(head);
     const fx = canvasLayer(st, W, H);
     const dur = 1.75 + p.hold + (p.exit ? 0.3 : 0);
-    S = { p, u, W, H, head, cards, fx, dur };
+    S = { p, u, W, H, head, cards, fx, dur, spread: items.length <= 3 ? 23 : 15 };
     return {
       duration: dur,
       sfx: [{ t: 0, name: "pop", gain: -6 }, { t: 0.22, name: "whoosh2", gain: -8 },
@@ -75,7 +81,7 @@ export default {
       // browse: each card lifts in turn (right to left), then the favourite comes forward
       const bk = Math.sin(Math.PI * seg(t, 0.85 + (n - 1 - i) * 0.08, 1.15 + (n - 1 - i) * 0.08));
       const fav = i === p.focus ? easeOutBack(seg(t, 1.25, 1.55), 2) : 0;
-      const x = mid * 15 * u * f, y = Math.abs(mid) * 2.2 * u * f - bk * 4 * u - fav * 3 * u;
+      const x = mid * s.spread * u * f, y = Math.abs(mid) * 2.2 * u * f - bk * 4 * u - fav * 3 * u;
       const r = mid * 9 * f * (1 - fav);
       const sc = (ak <= 0 ? 0.001 : spring(ak, 1.5, 6)) * (1 + 0.06 * bk + 0.22 * fav) * (1 - ex);
       c.style.zIndex = i === p.focus && fav > 0 ? 20 : 10 - Math.abs(Math.round(mid));

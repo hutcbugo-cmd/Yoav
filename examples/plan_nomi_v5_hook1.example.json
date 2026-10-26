@@ -282,7 +282,21 @@
    "name": "PortfolioGallery",
    "at": 129.11,
    "params": {
-    "hold": 0.4
+    "hold": 0.4,
+    "photos": [
+     {
+      "src": "assets/brands/nomi/portfolio/sage.jpg",
+      "pos": "55% 32%"
+     },
+     {
+      "src": "assets/brands/nomi/portfolio/nude_shimmer.jpg",
+      "pos": "45% 60%"
+     },
+     {
+      "src": "assets/brands/nomi/portfolio/milky_white.jpg",
+      "pos": "35% 55%"
+     }
+    ]
    },
    "size": [
     800,
@@ -333,7 +347,8 @@
    "name": "ChatSend",
    "at": 149.83,
    "params": {
-    "hold": 0.8
+    "hold": 0.8,
+    "photo": "assets/brands/nomi/portfolio/sage.jpg"
    },
    "size": [
     800,

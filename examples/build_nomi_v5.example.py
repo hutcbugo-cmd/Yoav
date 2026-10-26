@@ -8,6 +8,7 @@ def src(out_t):
     w = tl[i]
     return round(w['src'] + (out_t - w['out']), 3)
 LOGO = "assets/brands/nomi/logo_icon.png"
+PF = "assets/brands/nomi/portfolio/"
 # layout: everything stays above the caption band (bottom <= 0.60 H) and never overlaps in time
 sq = dict(size=[800, 800], w=0.6, x=0.69, y=0.42, sfx_gain_db=-5)
 def anim(name, out_t, params, **kw):
@@ -24,10 +25,12 @@ p['popups'] = keep + [
     # app section: phone (search -> results), portfolio on "תיק העבודות", phone again (book)
     anim("SmartphoneAppReveal", 13.5, {"logo": LOGO, "exit_at": 2.65, "_timemap": [[0, 0], [0.75, 1.25],
         [1.1, 2.05], [1.4, 2.45], [3.95, 2.65], [4.4, 3.1]]}, **PHONE),
-    anim("PortfolioGallery", 17.95, {"hold": 0.4}),
+    anim("PortfolioGallery", 17.95, {"hold": 0.4, "photos": [  # real work photos from the client
+        {"src": PF + "sage.jpg", "pos": "55% 32%"}, {"src": PF + "nude_shimmer.jpg", "pos": "45% 60%"},
+        {"src": PF + "milky_white.jpg", "pos": "35% 55%"}]}),
     anim("SmartphoneAppReveal", 20.4, {"logo": LOGO, "content_offset": 2.85, "_timemap": [[0, 0], [0.95, 1.2],
         [3.65, 3.9], [4.1, 4.35]]}, **PHONE),
-    anim("ChatSend", 24.55, {"hold": 0.8}),
+    anim("ChatSend", 24.55, {"hold": 0.8, "photo": PF + "sage.jpg"}),
     anim("VibeToggle", 27.45, {"quiet_at": 2.46, "fun_at": 5.25, "hold": 0.6}),
     anim("VerifiedStars", 35.2, {"check_at": 0.45, "stars_at": 2.7, "hold": 0.0}),
     anim("BusinessSignup", 39.1, {"type_at": 0.3, "chips_at": 0.9, "tap_at": 1.2, "badge_at": 1.45, "hold": 0.0}),
