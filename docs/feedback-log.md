@@ -222,3 +222,10 @@ Rules: place overlays from QC frames, not from numbers. Taglines must clear the 
 | Bring the word "Nomi" back; show the logo at the same time | round 14b replaced the word | `caption_logos` off; the LogoReveal animation shows with the word |
 | A stray "okay" before "אני מזמינה" | whisper heard it as "אז" (360.43); clip started there | CTA clip starts at 360.8 on "אני" |
 Rule: default overlay position is centre-chest, not the side. Check the start of every clip for leftover words to the director ("okay", "אז").
+
+## Round 17 — Nomi v7 hook 1 ("close to perfect": two fixes)
+| Client note | Root cause | Fix |
+|---|---|---|
+| Silence before "בלי לשווק את עצמך" | Whisper put "בלי" at 310.45; re-transcribing the 2.6 s snippet put the real onset at 310.70 (breath before it); the snap trusted the early time | clip starts at 310.66 with per-clip `snap_start: false` (new option for measured cuts) |
+| Animations touch her face and are a bit small | centred overlays had to fit between chin and captions at 0.70 H | captions down to 0.77 H; overlays down and bigger (squares w 0.62 at y 0.52, phone w 0.46, nail w 0.6) |
+Note: QC frames past the end of the video return a misleading frame; check the duration first.

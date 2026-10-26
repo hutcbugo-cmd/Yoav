@@ -34,7 +34,10 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
   GrabCut + flat-background removal, lower strap faded (see Round 4 in the feedback log). Ask the client to re-send it.
 
 ## Brand assets
-- Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Client rule: the word
-  "Nomi" is always shown as the logo (`style.caption_logos`), never as plain text. Pass it to vanim as
+- Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Client rule (round 16): keep
+  the word "Nomi" in the captions and show the LogoReveal animation at the same moment. `caption_logos`
+  (word → logo image) exists but is off for Nomi.
+- Nomi layout (approved v7): captions at 0.77 H; animations centred between chin and captions
+  (squares w 0.62 at y 0.52, phone w 0.46), one at a time; `examples/build_nomi_v7.example.py`. Pass it to vanim as
   `"logo": "assets/brands/nomi/logo_icon.png"` (SmartphoneAppReveal splash + header).
 - Animation engine: `docs/animation-engine.md` (`vanim/`, `vanim.py`, pop-up kind `anim`).

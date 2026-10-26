@@ -514,7 +514,8 @@ def main():
     if plan.get("snap_cuts", True):
         for k, c in enumerate(clips):
             nxt_joined = k + 1 < len(clips) and clips[k + 1].get("joined")
-            snap_clip(c, allw, audio, meta["fps"], start=not c.get("joined"), end=not nxt_joined)
+            snap_clip(c, allw, audio, meta["fps"], start=not c.get("joined") and c.get("snap_start", True),
+                      end=not nxt_joined and c.get("snap_end", True))  # off: a measured cut is kept as given
         for a_, b_ in zip(clips, clips[1:]):
             if b_.get("joined"):
                 b_["s"] = a_["e"]
