@@ -174,3 +174,7 @@ Rule: check the roll on every new camera setup (vertical lines against a guide) 
 - Round 12b: "captions really small". In `plain` mode (no stroke) Assistant's Hebrew glyphs render at only ≈ half of
   the ASS font size, so 0.095 W looked like ≈ 0.05 W of letter height. Fix: `caption_size 0.14` for plain captions;
   libass wraps them into two balanced lines. Rule: judge caption size on a rendered frame, not by the number.
+- Round 12c: "music a bit too loud" and "less space between caption lines". Music −7 → −11 dB, ducking ratio 3 → 5
+  at threshold 0.04 (round 11's −7 dB overcorrected "music weak"). Plain captions now split into two balanced
+  lines by `split_lines` (Pillow width) and placed by hand, `line_spacing` 0.78 × font size between line centres
+  (libass's own gap ≈ 1.03 ×). Output −14.1 LUFS, peak −1.5 dBFS.

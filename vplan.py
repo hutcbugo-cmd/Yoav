@@ -276,6 +276,16 @@ def render_box(text, emoji, path, style, W):
 
 
 # ---------------------------------------------------------------- captions
+def split_lines(words, font, max_w):
+    """One line if it fits, else the two-line split with the narrowest wider line."""
+    text = " ".join(words)
+    if len(words) < 2 or font.getlength(text) <= max_w:
+        return [words]
+    k = min(range(1, len(words)), key=lambda k: max(font.getlength(" ".join(words[:k])),
+                                                    font.getlength(" ".join(words[k:]))))
+    return [words[:k], words[k:]]
+
+
 def build_captions(plan, words_by_clip, offsets, W, H):
     st = plan["style"]
     fs = round(W * st.get("caption_size", 0.068))
@@ -304,6 +314,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,0,0,0,0,100,100,0,0,1,"
             f"0,{max(2, round(fs * 0.05))},5,90,90,0,-1")
         hi_on = hi_off = ""
+        from PIL import ImageFont
+        plain_font = ImageFont.truetype(st["font_file"], fs)
     if mode == "fill":
         # white words with a solid black stroke; the spoken word's fill turns the accent colour
         ob = max(2, round(fs * st.get("stroke", 0.06)))
@@ -368,8 +380,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 if mode == "plain":
                     if i:  # one event per caption chunk; no per-word change
                         continue
-                    e = end
-                    txt = r"{\blur2}" + " ".join(clean)
+                    # two balanced lines placed by hand: libass's own line gap (~1.03 x font
+                    # size) looked too airy, so `line_spacing` sets the gap between line centres
+                    rows = split_lines(clean, plain_font, W - 180)
+                    gap = round(fs * st.get("line_spacing", 0.78))
+                    for r, row in enumerate(rows):
+                        ry = y + round((r - (len(rows) - 1) / 2) * gap)
+                        lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(end)},Cap,,0,0,0,,"
+                                     f"{{\\an5\\pos({W // 2},{ry})}}{{\\blur2}}{' '.join(row)}")
+                    continue
                 elif mode == "fill":
                     txt = " ".join((hi_on + t + hi_off) if j == i else t for j, t in enumerate(clean))
                 else:
