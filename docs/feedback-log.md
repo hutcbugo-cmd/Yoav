@@ -280,3 +280,10 @@ close-up can't be fully centred.
   | Maya's "אמ" before Q4 | voiced 44.22–44.37 | Q4 starts 44.56 ("היית יכולה…") |
   | Road-trip animation in the hook too | — | fast RoadTrip in the cold open |
   | Odd 0.3 s shot of Maya after "Nomi" | clip 122.91 ("את", 0.34 s) | removed; phone re-timed so it doesn't hit the logo or the portfolio |
+- Video 4 v3/v4: "sound weak and windy, a better tool must exist; 'הזמינות' still not heard, caption late".
+  Root cause: the clip began at 15.98 but the word is voiced 15.70–16.30 (a 20 ms pitch track shows it; the
+  30 ms one missed it), so half the word and the caption's start were cut. RNNoise `bd` also ate the word's body.
+  Fix: clip 15.62–16.42 (+3 dB `gain_adj`), caption retimed. Survey audio enhanced up front with **DeepFilterNet3**
+  (pause wind −17.3 → −31.5 LUFS with the voice kept: "הזמינות" −15.7 → −15.9). Then presence + gentle
+  compression per clip. Music −15 dB under the survey. Result: guest +1 dB, "הזמינות" −12.6, total −14.2 LUFS.
+  Rule: for field audio, use DeepFilterNet first; RNNoise only as a light fallback.

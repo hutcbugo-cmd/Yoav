@@ -44,6 +44,11 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
   Music: `https://assets.mixkit.co/music/303/303.mp3` → `m303.mp3` ("Party", drop at 13.95 s).
   SFX (`https://assets.mixkit.co/active_storage/sfx/<id>/<id>-preview.mp3` → `<name>.mp3`):
   pop 2364, pop2 2357, whoosh 1489, whoosh2 1490, riser 1144, impact 1143, money 1989, coin 1999, sparkle 871, click 1109.
+- Noisy/windy field audio: DeepFilterNet3 (MIT). `pip install torch torchaudio deepfilternet` (PyPI; download.pytorch.org
+  is blocked), then `pip install "numpy>=2.1"` again (deepfilternet pins numpy<2, which breaks OpenCV). Patch
+  `df/io.py`: wrap `from torchaudio.backend.common import AudioMetaData` in try/except. Model: github.com is blocked,
+  so fetch `https://raw.githubusercontent.com/Rikorose/DeepFilterNet/main/models/DeepFilterNet3.zip` and unzip.
+  Run `examples/survey/enhance_df.example.py`. RNNoise (`assets/models/std.rnnn`, BSD) is the light fallback.
 - Watch sticker: client photo of the L&P watch (dial reads "poedagar" — confirm with client); cut out with
   GrabCut + flat-background removal, lower strap faded (see Round 4 in the feedback log). Ask the client to re-send it.
 

@@ -657,6 +657,7 @@ def main():
             gain = float(np.clip(st.get("dialog_rms", -20) - rms_f, -6, 12))
         else:
             gain = float(np.clip(st.get("dialog_rms", -20) - rms, -6, 9))
+        gain += c.get("gain_adj", 0.0)  # hand trim for a word said away from the mic
         # 15 ms fades on clean cuts; 40 ms where the cut had to land inside continuous speech
         def edge_fade(t):
             lvl = 20 * np.log10(np.sqrt(np.mean(audio[int(t * 16000) - 160:int(t * 16000) + 160] ** 2)) + 1e-9)

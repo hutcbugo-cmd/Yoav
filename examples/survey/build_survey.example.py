@@ -11,7 +11,9 @@ def comb(t):
     raise ValueError(t)
 nomi = json.load(open(f"{V3}/plan_v5_hook1.json"))          # approved Nomi v9
 GRADE = "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3"  # v2: v1 too saturated
-WIND = "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2"  # wind ≈ voice level on this take
+# v4: wind removed up front with DeepFilterNet3 (enhance_df.py -> combined_enh.mp4); here only presence and a
+# gentle compressor so both voices sit forward ("weak" in v3)
+WIND = "highpass=f=90,equalizer=f=3500:t=q:w=1.2:g=2.5,acompressor=threshold=-26dB:ratio=3:attack=5:release=150:makeup=3"
 MAYA, GUEST = 0.22, 0.76
 Z, ZP, WIDE = 1.39, 1.55, 0.8163                            # x base 1.225 -> 1.70 / 1.90 / 1.0 total
 def sv(s, e, who, zoom=Z, **kw):
@@ -22,7 +24,7 @@ clips = [
     sv(6.53, 8.35, GUEST, note="A1: שלושה-ארבעה שבועות."),
     sv(8.35, 10.25, GUEST, ZP, note="A1: אני יוצאת מתור וקובעת כבר לתור הבא."),
     sv(11.77, 14.63, MAYA, note="Q2: מה הכי מעצבן אותך בלקבוע תור לטיפול ציפורניים?"),
-    sv(15.98, 16.98, GUEST, snap_start=False, snap_end=False, note="A2: הזמינות"),  # voiced 16.10-16.95
+    sv(15.62, 16.42, GUEST, snap_start=False, snap_end=False, gain_adj=3.0, note="A2: הזמינות"),  # voiced 15.70-16.30 (20 ms pitch track)
     sv(17.7, 23.94, GUEST, ZP, note="A2: אני לא אצל מישהי שמשתמשת באפליקציה נגיד, אז זה בוואטסאפ, אז אני צריכה לחכות שהיא תענה לי"),
     sv(26.43, 30.61, MAYA, note="Q3: קרה לך שהיית צריכה טיפול ממש דחוף ולא הייתה אף אחת פנויה?"),
     sv(31.36, 32.02, GUEST, snap_start=False, note="A3: כן, זה קרה לי,"),
@@ -41,7 +43,7 @@ for c in nomi["clips"]:
         d["note"] = "MAYA: " + c.get("note", "")
         clips.append(d)
 p = dict(nomi)
-p["source"] = f"{V4}/combined.mp4"
+p["source"] = f"{V4}/combined_enh.mp4"  # survey audio enhanced with DeepFilterNet3
 p["work"] = f"{V4}/work"
 p["clips"] = clips
 p["framing"] = dict(nomi["framing"], roll_deg=0.0)           # Nomi segments come from the levelled copy
@@ -78,7 +80,7 @@ p["sfx"].append({"name": "whoosh", "at": comb(112.0), "gain_db": -18, "dur": 0.6
 p["flashes"] = [{"at": comb(114.84), "dur": 0.3}]
 # music: groove from the top under the survey, then the drop lands on "Nomi" again
 mu = dict(nomi["music"])
-mu["sections"] = [{"out_until": comb(112.0), "track_start": 0.0, "fade_in": 0.02, "fade_out": 0.6},
+mu["sections"] = [{"out_until": comb(112.0), "track_start": 0.0, "fade_in": 0.02, "fade_out": 0.6, "gain_db": -15},  # under the windy survey: voice first
                   {"out_from": comb(112.0), "sync": {"src": comb(114.84), "track": 18.28}, "fade_in": 0.4, "fade_out": 1.0}]
 p["music"] = mu
 json.dump(p, open(f"{V4}/work/plan_v1.json", "w"), ensure_ascii=False, indent=1)
