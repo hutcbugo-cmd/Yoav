@@ -171,3 +171,6 @@ Rules: text-only pop-ups for this client (emoji may sit inside a text pill); mea
 | No "?" after "תיק העבודות שלה" | ASR punctuation | review `fix` "שלה?"→"שלה" | — |
 | White captions, no stroke, no pink | Style choice | `caption_mode: "plain"`: white, no outline, soft shadow, no word fill, no pop-in | — |
 Rule: check the roll on every new camera setup (vertical lines against a guide) before framing.
+- Round 12b: "captions really small". In `plain` mode (no stroke) Assistant's Hebrew glyphs render at only ≈ half of
+  the ASS font size, so 0.095 W looked like ≈ 0.05 W of letter height. Fix: `caption_size 0.14` for plain captions;
+  libass wraps them into two balanced lines. Rule: judge caption size on a rendered frame, not by the number.
