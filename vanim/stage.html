@@ -30,6 +30,9 @@ window.__setup = async (params, W, H) => {
   await document.fonts.load('800 40px "Assistant"');
   await document.fonts.load('700 40px "Assistant"');
   const info = await mod.setup(root, params, W, H);
+  // images (logos, product shots) must be decoded before the first frame is captured
+  await Promise.all([...root.querySelectorAll("img")].map((im) => im.decode().catch(() => {
+    console.error("image failed to load: " + im.src); })));
   return info || {};
 };
 window.__frame = async (t) => { await mod.frame(t); };

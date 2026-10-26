@@ -40,6 +40,12 @@ function buildScreen(p, sw, sh) {
 
   // --- page 1: home + search + results
   const home = el("div", `position:absolute;inset:0;padding:${15 * u}px ${6 * u}px 0`);
+  if (p.logo) {  // small app icon in the header corner
+    const ic = el("img", `position:absolute;left:${6 * u}px;top:${15 * u}px;width:${11 * u}px;
+      border-radius:${2.6 * u}px;box-shadow:0 ${0.6 * u}px ${2 * u}px rgba(0,0,0,.15)`);
+    ic.src = "/" + p.logo;
+    home.append(ic);
+  }
   home.append(el("div", `font:800 ${7.2 * u}px Assistant;line-height:1.1`, "היי, מה מתחשק<br>לך היום?"));
   const search = el("div", `margin-top:${5 * u}px;height:${12 * u}px;border-radius:${6 * u}px;background:#fff;
     box-shadow:0 ${0.8 * u}px ${3 * u}px rgba(160,40,90,.14);display:flex;align-items:center;
@@ -123,11 +129,12 @@ function buildScreen(p, sw, sh) {
   // --- splash
   const splash = el("div", `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 50% 40%, ${shade(A, 0.3)}, ${A} 70%);z-index:3`);
-  const logo = p.logo
-    ? el("img", `width:${50 * u}px`)
-    : el("div", `font:800 ${20 * u}px Assistant;color:#fff;letter-spacing:${-0.5 * u}px;
-        text-shadow:0 ${1 * u}px ${4 * u}px rgba(0,0,0,.18);direction:ltr`, p.brand);
-  if (p.logo) logo.src = "/" + p.logo;
+  const word = `<div style="font:800 ${(p.logo ? 13 : 20) * u}px Assistant;color:#fff;letter-spacing:${-0.5 * u}px;
+      text-shadow:0 ${1 * u}px ${4 * u}px rgba(0,0,0,.18);direction:ltr">${p.brand}</div>`;
+  // with an app icon: icon above the wordmark, like a real app launch screen
+  const logo = el("div", `display:flex;flex-direction:column;align-items:center;gap:${3 * u}px`,
+    (p.logo ? `<img src="/${p.logo}" style="width:${38 * u}px;border-radius:${8 * u}px;
+      box-shadow:0 ${2 * u}px ${6 * u}px rgba(0,0,0,.22)">` : "") + word);
   splash.append(logo);
 
   // --- confirmation sheet

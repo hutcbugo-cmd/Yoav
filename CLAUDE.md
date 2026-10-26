@@ -32,3 +32,8 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
   pop 2364, pop2 2357, whoosh 1489, whoosh2 1490, riser 1144, impact 1143, money 1989, coin 1999, sparkle 871, click 1109.
 - Watch sticker: client photo of the L&P watch (dial reads "poedagar" — confirm with client); cut out with
   GrabCut + flat-background removal, lower strap faded (see Round 4 in the feedback log). Ask the client to re-send it.
+
+## Brand assets
+- Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Pass it to vanim as
+  `"logo": "assets/brands/nomi/logo_icon.png"` (SmartphoneAppReveal splash + header).
+- Animation engine: `docs/animation-engine.md` (`vanim/`, `vanim.py`, pop-up kind `anim`).
