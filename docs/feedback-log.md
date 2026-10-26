@@ -214,3 +214,11 @@ Rules: place overlays from QC frames, not from numbers. Taglines must clear the 
   `photos` [{src, pos}] (bigger cards, object-position keeps the nails in frame) and ChatSend `photo`. Rule: when
   the client has real product/work photos, use them instead of drawn stand-ins. Photos sit in
   `assets/brands/nomi/portfolio/`, git-ignored until their usage rights are confirmed.
+
+## Round 16 — Nomi v6 hook 1 ("animations perfect, position wrong: too far right")
+| Client note | Root cause | Fix |
+|---|---|---|
+| Animations sit too far to the side, want them central | right-side placement (x 0.69–0.74) | all centred x 0.5, between her chin (~0.33 H) and the caption band (0.63 H): squares w 0.5 at y 0.475, phone w 0.38; "דחוף!" slam dropped (it would sit on the centred nail painting) |
+| Bring the word "Nomi" back; show the logo at the same time | round 14b replaced the word | `caption_logos` off; the LogoReveal animation shows with the word |
+| A stray "okay" before "אני מזמינה" | whisper heard it as "אז" (360.43); clip started there | CTA clip starts at 360.8 on "אני" |
+Rule: default overlay position is centre-chest, not the side. Check the start of every clip for leftover words to the director ("okay", "אז").
