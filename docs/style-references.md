@@ -90,3 +90,17 @@ What makes it work:
 Weak points: clipping (+0.6 dBTP), small text inside a laptop inside a Reel UI.
 For us: vanim can build exactly this (HTML/CSS 3D + canvas glow line). Needs a "light-trail" track that links
 modules across an ad, plus a Hebrew VO (human or a licensed TTS; none available locally).
+Motion details (inner ad only, from 6–10 fps crops):
+- Logo open: the app icon focuses in from blur (rack focus), holds ~0.8 s, defocuses out. The first word comes in
+  through the same blur. Every element enters or leaves through a focus pull, never a plain fade.
+- The light line draws itself from the bottom edge with a bright comet head. From then on it is always in
+  frame and **becomes the glowing outline of each phone or card**: the object rides on the line.
+- Type: heavy rounded sans, right-aligned top-right (RTL), line 1 off-white, line 2 brand yellow. A word
+  arrives with a short blur-in, and the punctuation is part of the design ("לתדלק?", "וזהו.").
+- Micro-feedback inside the UI: after "Apple Pay" a small green "שולם ✓" chip pops. The barcode slides out of
+  the card. The ₪ counter runs 20 → 50.
+- Transitions: a whip pan with **echo/strobe ghost trails** (the phone smears into several copies), the next
+  object slides in from blur. The finale is a **zoom-through**: a plane icon flies at the camera until it fills
+  the frame, cuts to a flat brand-yellow field, and the red wordmark pops with a blinking-eye "o".
+- Look: near-black warm background, soft radial spotlight behind the object, bloom on the line and outlines,
+  gentle constant camera drift and 3D tilt (nothing is ever fully still).
