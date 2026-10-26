@@ -287,3 +287,16 @@ close-up can't be fully centred.
   (pause wind −17.3 → −31.5 LUFS with the voice kept: "הזמינות" −15.7 → −15.9). Then presence + gentle
   compression per clip. Music −15 dB under the survey. Result: guest +1 dB, "הזמינות" −12.6, total −14.2 LUFS.
   Rule: for field audio, use DeepFilterNet first; RNNoise only as a light fallback.
+
+## Video 5 — street survey #2 (Maya + Noa & Adi, very windy) + Maya's Nomi explanation
+55.9 s, −14.2 LUFS. Built on the video-4 pipeline, with one change in order: **DeepFilterNet3 on the whole
+take first** (pause wind −15.9 → −63.9 LUFS; in the raw take the wind was louder than speech), then a
+re-transcription on the clean audio (clearer words), then cutting.
+- Cuts measured on the clean audio (energy works again once the wind is gone); `snap: false` on every survey clip.
+- Whisper on the cleaned audio runs ≈0.25 s early. Without a +0.25 s shift the first word of half the clips
+  ("מה", "אם", "אני", "האמת") dropped out of the captions. `make_combined` now shifts survey words.
+- Left out what can't be verified: the second girl's "soldier" answer and "בייזן חוץ" stayed garbled even after
+  enhancement. Rule: don't caption guesses.
+- Two-shot of both girls (face_x 0.3), Maya close-up (0.75), cold open on "האמת היא שהתחננתי שהיא תקבל אותי".
+- New vanim modules: BookingLoop (books the next one each time), CheckOff (stuck mid-day → tick it off),
+  PleaChat (begging messages → referral), SearchFrenzy (search results all "אין זמינות"). BigButton → "ברור שכן!".
