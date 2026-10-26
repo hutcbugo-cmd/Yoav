@@ -61,14 +61,8 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
   `"logo": "assets/brands/nomi/logo_icon.png"` (SmartphoneAppReveal splash + header).
 - Animation engine: `docs/animation-engine.md` (`vanim/`, `vanim.py`, pop-up kind `anim`).
 
-## Next task (handoff): Nomi explainer VO with ElevenLabs
-The client connected ElevenLabs (`api.elevenlabs.io` is allowed; the key comes in as `ELEVENLABS_API_KEY` or via a
-network secret in a new session). Wanted: a **female** voice, natural and warm, not robotic; fast turnaround.
-1. Check the key: `GET /v1/user/subscription`. Pick a Hebrew-capable model (`eleven_v3` or `eleven_multilingual_v2`;
-   list with `GET /v1/models`) and 2–3 young, warm female voices (`GET /v1/voices`, or the voice library).
-2. Generate the 11 lines from `examples/explainer/script.json` (`vo` field, Hebrew; try niqqud only if a word is
-   mispronounced; "נומי" for Nomi). Check each with Whisper. Send the client a short sample of each voice to pick from, or
-   pick the best one if asked to be fast.
-3. Save to `<scratchpad>/explainer/vo/<id>.wav` and run `examples/explainer/make_explainer.py` (the animation is cached,
-   so only the timing and the mix change). Previous render: 25.7 s, 1920×1080; the Chatterbox voice was rejected ("sounds
-   like a man / a bot").
+## Nomi explainer (16:9), done
+VO: the client's ElevenLabs take (voice "Posh", one recording) used as is. Sentence starts come from Whisper +
+energy onset (`examples/explainer/vo_starts_elevenlabs.json`), and `make_explainer_vo.py` sets each scene on its
+sentence. 27.9 s, −14.4 LUFS. To swap the voice again, send a new recording; the animation re-renders in ~10 min
+(cache in the scratchpad) or ~2 min if the cache survived.
