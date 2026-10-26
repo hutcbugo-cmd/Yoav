@@ -37,7 +37,7 @@ Approval stages (A analysis → B EDL → C style → D render) unless the clien
 - Nomi: `assets/brands/nomi/` (app icon from the client, low-res; see its README). Client rule (round 16): keep
   the word "Nomi" in the captions and show the LogoReveal animation at the same moment. `caption_logos`
   (word → logo image) exists but is off for Nomi.
-- Nomi layout (v8): captions at 0.745 H; animations centred between chin and captions
-  (squares w 0.62 at y 0.52, phone w 0.46), one at a time; `examples/build_nomi_v8.example.py`. Pass it to vanim as
+- Nomi layout (v9): captions at 0.72 H; animations centred between chin and captions
+  (squares w 0.58 at y 0.495, phone w 0.42), one at a time; `examples/build_nomi_v9.example.py`. Pass it to vanim as
   `"logo": "assets/brands/nomi/logo_icon.png"` (SmartphoneAppReveal splash + header).
 - Animation engine: `docs/animation-engine.md` (`vanim/`, `vanim.py`, pop-up kind `anim`).

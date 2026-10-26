@@ -237,3 +237,7 @@ Note: QC frames past the end of the video return a misleading frame; check the d
 | Captions too low now; smaller gap to the animations | 0.77 H overcorrected | captions 0.745 H; tagline logos raised to y 0.485 |
 | (found while fixing) a dry run overwrote the shared `timeline.json` the plan builder reads → every later cue shifted (render failed on 413.56) | one file for all plans | `--dry` writes `timeline_<plan>.json`; builder reads the v3 timeline; late cues anchored by source time |
 Rule: find pauses with voicing (pitch), not energy. Wind noise hides silence from energy measurements.
+- Round 18b: "a half second of complete silence at ~45 s between 'בסביבה שלך' and 'בלי לשווק'". Measured v8: voice
+  continuous 44.0–45.1 s (cut gap 0.11 s) and the music has no drop there. v7 did have a 0.6 s wind-only gap at
+  exactly that spot, so the client probably replayed v7. Asked to confirm against v9. Captions raised to 0.72 H;
+  overlays slightly smaller to keep clear of them.
