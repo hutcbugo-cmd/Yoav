@@ -16,6 +16,20 @@ rules) and `docs/style-references.md` before editing. Reply to the client in Heb
 - Sound: Mixkit music "Party" (groove under the hook, drop synced to the price reveal),
   SFX on peaks, dialogue levelled, −14 LUFS.
 
+## How this client likes it (learned on Nomi, approved v9; `examples/plan_nomi_v9_hook1.example.json`)
+- Captions: `caption_mode: "plain"`: white, no stroke, no colour fill, soft shadow; `caption_size` 0.14,
+  two balanced lines (`line_spacing` 0.78), at 0.72 H. Brand words stay as words.
+- Motion graphics over generic pop-ups: vanim animations that illustrate the exact words (no emoji-only
+  stickers). Centred between chin and captions, one at a time, never on the face or captions. Real photos
+  from the client beat drawn stand-ins. Brand logo animates in on every mention of the brand.
+- Framing: level the horizon (`roll_deg`), centre face + body (`body_weight`), punch-ins on emphasis.
+- Pace: no dead air anywhere. Check gaps with voicing (pitch), not energy (wind hides silence). Cut leftover
+  words to the director ("okay").
+- Sound: music under speech, not over it (−11 dB, duck ratio 5); SFX on every animation beat; gentle
+  dialogue clean-up with presence; −14 LUFS, limiter −3 dBFS.
+- Process: a short preview first, then the full video. Render one hook until it is approved, then reuse the
+  approved edit for other hooks (source-anchored cues). Answer fast and in Hebrew.
+
 ## Workflow
 1. Client sends a Google Drive link → `curl -L "https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t"`.
 2. `vedit.py transcribe` + `diarize` + `report`; write `work/review.json` (terms: `{"L&P": ["NLP","L&B","LNP"]}`).
