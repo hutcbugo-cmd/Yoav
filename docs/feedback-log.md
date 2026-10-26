@@ -304,3 +304,17 @@ re-transcription on the clean audio (clearer words), then cutting.
   "קרה"; clip now starts 68.50. "הייתן משתמשות" was cut: the word runs to 98.38, the clip ended 98.22 (energy
   threshold too strict on the tail); now 98.44. Rule: before every clip start, look for a filler word that
   whisper merged into the next one; for clip ends, use the 20 ms energy tail, not the run detector.
+
+## Nomi explainer (16:9, 25.7 s) in the Yellow-reference style
+Client: "exactly a video like this, landscape, our logo, colours and story, a pleasant female VO, ~30 s".
+- VO: Chatterbox Multilingual (Resemble AI, **MIT**; it adds a Perth watermark marking the audio as AI). ElevenLabs,
+  OpenAI and Microsoft are blocked here, and Meta MMS Hebrew is non-commercial. Plain Hebrew text came out
+  garbled (Whisper similarity 0.6–0.78); **niqqud text → 0.96–1.0**. A single synthetic reference take (no real
+  person cloned) keeps one voice across lines (pitch 152–205 Hz). Best of 3 seeds per line, scored by Whisper
+  similarity + pitch range; retakes for the 2 weak lines. Install: `pip install --no-deps chatterbox-tts` + deps
+  without its torch pins, `setuptools<81` (perth needs pkg_resources), save with soundfile (torchaudio wants
+  torchcodec).
+- Animation: `vanim/lib/NomiExplainer.js`, one world with 10 scenes on a continuous pink light-trail line, camera
+  glides on each VO line with motion blur, 2-line text pulls focus, brand flood end card. 1920×1080, 30 fps.
+- Mix: VO −18 LUFS per line, Mixkit "Fashion" ducked under the VO with its drop on "תכירי את נומי", SFX from the
+  animation cues, −14.3 LUFS, −2.7 dBTP. Scripts: `examples/explainer/`.
