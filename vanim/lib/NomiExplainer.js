@@ -234,21 +234,22 @@ const SCENES = {
 export default {
   async setup(root, params, W, H) {
     const p = Object.assign({ accent: "#FF2E8B", cues: [], end: 30, logo: "", photos: [], tagline: "מניקור עד הבית", cta: "הורידי עכשיו" }, params);
-    const u = H / 100;
-    S = { p, u, W, H, A: p.accent, logo: p.logo, photos: p.photos };
+    const portrait = H > W;                                       // 9:16 Reels layout: object centre-top, text below
+    const u = Math.min(W, H) / 100;
+    S = { p, u, W, H, A: p.accent, logo: p.logo, photos: p.photos, portrait };
     root.style.background = BG;
-    const view = el("div", `position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse 55% 60% at 36% 52%, #3a1428 0%, ${BG} 70%)`);
+    const view = el("div", `position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse ${portrait ? "80% 45% at 50% 38%" : "55% 60% at 36% 52%"}, #3a1428 0%, ${BG} 70%)`);
     root.append(view);
     const scenes = p.cues.filter((c) => SCENES[c.id]);
-    const SP = W * 0.95;                                          // world distance between scenes
+    const SP = portrait ? W * 1.2 : W * 0.95;                     // world distance between scenes
     const world = el("div", `position:absolute;left:0;top:0;width:${(scenes.length + 1) * SP}px;height:${H}px;transform-style:preserve-3d;perspective:${200 * u}px`);
     view.append(world);
-    const OX = W * 0.34, OY = H * 0.47, OS = 1.35;                // object anchor on screen, object scale
+    const OX = portrait ? W * 0.5 : W * 0.34, OY = portrait ? H * 0.47 : H * 0.47, OS = portrait ? 1.6 : 1.35;  // anchor, scale
     // the line: from the bottom-left edge into each object's base, dipping between scenes
-    let d = `M ${-W * 0.3} ${H * 0.95} C ${OX - W * 0.25} ${H * 0.95}, ${OX - W * 0.08} ${H * 0.8}, ${OX} ${OY + 17 * u * OS}`;
+    let d = `M ${-W * 0.3} ${portrait ? OY + 36 * u * OS : H * 0.95} C ${OX - W * 0.25} ${portrait ? OY + 36 * u * OS : H * 0.95}, ${OX - W * 0.08} ${portrait ? OY + 30 * u * OS : H * 0.8}, ${OX} ${OY + 17 * u * OS}`;
     scenes.forEach((c, i) => {
       const x0 = OX + i * SP, x1 = OX + (i + 1) * SP;
-      d += ` C ${x0 + W * 0.08} ${OY + 30 * u * OS}, ${x0 + SP * 0.4} ${H * 0.86}, ${(x0 + x1) / 2} ${H * 0.84}`
+      d += ` C ${x0 + W * 0.08} ${OY + 30 * u * OS}, ${x0 + SP * 0.4} ${portrait ? OY + 36 * u * OS : H * 0.86}, ${(x0 + x1) / 2} ${portrait ? OY + 34 * u * OS : H * 0.84}`
          + ` S ${x1 - W * 0.06} ${OY + 30 * u * OS}, ${x1} ${OY + 17 * u * OS}`;
     });
     const svg = el("div", "position:absolute;left:0;top:0", `<svg width="${(scenes.length + 1) * SP}" height="${H}" style="overflow:visible">
@@ -275,7 +276,9 @@ export default {
     // text block (screen space, right side), one per cue, pulls focus in and out
     S.texts = p.cues.map((c) => {
       if (!c.t1 && !c.t2) return null;
-      const t = el("div", `position:absolute;right:${W * 0.08}px;top:${H * 0.34}px;width:${W * 0.4}px;text-align:right;direction:rtl;opacity:0`,
+      const t = el("div", portrait
+        ? `position:absolute;right:${W * 0.07}px;top:${H * 0.13}px;width:${W * 0.86}px;text-align:center;direction:rtl;opacity:0`
+        : `position:absolute;right:${W * 0.08}px;top:${H * 0.34}px;width:${W * 0.4}px;text-align:right;direction:rtl;opacity:0`,
         `<div style="font:800 ${10 * u}px Assistant;color:#FFF3F8;line-height:1.0">${c.t1}</div>
          <div style="font:800 ${10 * u}px Assistant;color:${S.A};line-height:1.05;text-shadow:0 0 ${2 * u}px ${S.A}66">${c.t2}</div>`);
       view.append(t); return t;
