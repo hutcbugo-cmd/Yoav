@@ -249,3 +249,5 @@ New cues on its words: NailPainting on "לק ג'ל, מניקור", HomeCozy door
 "אירוע חשוב". Everything after the hook is source-anchored and carries over untouched
 (`examples/build_nomi_hook2.example.py`). 52.4 s, −13.9 LUFS.
 Rule: anchor cues to source times, so one approved edit can take any hook.
+Hook 2 approved by the client ("כן").
+Final files: nomi_v9_hook1.mp4, nomi_v9_hook2.mp4 (scratchpad/video3).
