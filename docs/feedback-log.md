@@ -241,3 +241,11 @@ Rule: find pauses with voicing (pitch), not energy. Wind noise hides silence fro
   continuous 44.0–45.1 s (cut gap 0.11 s) and the music has no drop there. v7 did have a 0.6 s wind-only gap at
   exactly that spot, so the client probably replayed v7. Asked to confirm against v9. Captions raised to 0.72 H;
   overlays slightly smaller to keep clear of them.
+
+## Round 19 — hook 1 approved ("יש לנו את זה 👏"); hook 2 rendered
+Hook 1 v9 approved: `examples/plan_nomi_v9_hook1.example.json`.
+Hook 2 = the approved plan with the opening swapped for the one-take hook 2 (103.40–115.25, 5 joined sub-shots).
+New cues on its words: NailPainting on "לק ג'ל, מניקור", HomeCozy door on "לצאת", CalendarFull stamp on
+"אירוע חשוב". Everything after the hook is source-anchored and carries over untouched
+(`examples/build_nomi_hook2.example.py`). 52.4 s, −13.9 LUFS.
+Rule: anchor cues to source times, so one approved edit can take any hook.
