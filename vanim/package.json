@@ -1,0 +1,10 @@
+{
+  "name": "vanim",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StreetUP animation engine: deterministic Chromium renders of three.js / HTML / SVG animations with alpha",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "three": "^0.186.1"
+  }
+}

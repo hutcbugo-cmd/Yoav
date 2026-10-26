@@ -562,7 +562,29 @@ def main():
     graph.append(f"[{vlast}]ass='{ass}':fontsdir='{fontsdir}'[vs]")
     vlast = "vs"
     n_in = len(clips)
+    anim_cues = []  # sound cues returned by vanim animations (output-timeline seconds)
     for k, pu in enumerate(plan.get("popups", [])):
+        if pu.get("kind") == "anim":  # vanim engine: three.js / HTML / SVG animation with alpha
+            import vanim
+            t0 = out_t(pu["at"])
+            cw, ch = pu.get("size", [900, 900])
+            fdir, info = vanim.render(pu["name"], pu.get("params", {}), cw, ch, meta["fps"], work)
+            dur = info["n"] / meta["fps"]
+            ow = 2 * round(W * pu.get("w", 0.5) / 2)
+            oh = 2 * round(ow * ch / cw / 2)
+            inputs += ["-framerate", f"{meta['fps']:.5f}", "-i", os.path.join(fdir, "f_%05d.png")]
+            py = round(H * pu.get("y", st.get("popup_y", 0.53)))
+            if "y" not in pu and "x" not in pu:
+                py = place_clear_of_face(pu["at"], py, oh, ow, clips, faces, base, face_top, W, H, st)
+            px = f"{round(W * pu['x'])}-w/2" if "x" in pu else "(W-w)/2"
+            graph.append(f"[{n_in}:v]format=rgba,scale={ow}:{oh},setpts=PTS-STARTPTS+{t0:.3f}/TB[p{k}]")
+            graph.append(f"[{vlast}][p{k}]overlay=x='{px}':y='{py}-h/2':eof_action=pass:"
+                         f"enable='between(t,{t0:.3f},{t0 + dur:.3f})'[vp{k}]")
+            vlast = f"vp{k}"
+            n_in += 1
+            if pu.get("sfx", True):
+                anim_cues += vanim.sfx_cues(info, t0, plan["sfx_dir"], work, pu.get("sfx_gain_db", -10))
+            continue
         if pu.get("kind") == "mg":  # frame-by-frame motion graphics (vmotion.py)
             import vmotion
             t0 = out_t(pu["at"])
@@ -681,6 +703,15 @@ def main():
                      f"afade=t=out:st={max(0, dur - 0.15):.3f}:d=0.15,volume={fx.get('gain_db', -10):.1f}dB,"
                      f"adelay={int(t0 * 1000)}:all=1[fx{k}]")
         mix.append(f"[fx{k}]")
+        n_in += 1
+    for k, c in enumerate(anim_cues):  # placed so each sound lands on its animation frame
+        import vanim
+        trim, t0 = vanim.place_cue(c)
+        inputs += ["-i", c["file"]]
+        graph.append(f"[{n_in}:a]aresample=48000,atrim=start={trim:.3f}:duration={c['dur']:.3f},"
+                     f"asetpts=PTS-STARTPTS,afade=t=out:st={max(0, c['dur'] - 0.15):.3f}:d=0.15,"
+                     f"volume={c['gain_db']:.1f}dB,adelay={int(t0 * 1000)}:all=1[ax{k}]")
+        mix.append(f"[ax{k}]")
         n_in += 1
     graph.append(f"{''.join(mix)}amix=inputs={len(mix)}:normalize=0:duration=first,"
                  f"loudnorm=I={st.get('lufs', -14)}:TP=-1.5:LRA=11,aresample=48000,"

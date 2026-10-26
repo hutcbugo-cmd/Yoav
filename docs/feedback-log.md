@@ -178,3 +178,13 @@ Rule: check the roll on every new camera setup (vertical lines against a guide) 
   at threshold 0.04 (round 11's −7 dB overcorrected "music weak"). Plain captions now split into two balanced
   lines by `split_lines` (Pillow width) and placed by hand, `line_spacing` 0.78 × font size between line centres
   (libass's own gap ≈ 1.03 ×). Output −14.1 LUFS, peak −1.5 dBFS.
+
+## Round 13 — "still too static": animation engine (vanim)
+Client brief: real motion design from the meaning of the dialogue, not static PNG pop-ups.
+Root cause: pop-ups were Pillow PNG frames with scale/fade only; no 3D, no UI, nothing illustrating the words.
+Fix: new modular engine `vanim/` + `vanim.py` (see docs/animation-engine.md). Chromium is driven frame by frame
+(three.js 3D, HTML/CSS 3D, SVG, canvas) into an alpha PNG sequence. Every animation returns its SFX cues, and `vplan`
+pop-up kind `anim` composites the animation and places the cues. First modules: NailPainting (3D) and
+SmartphoneAppReveal (booking flow). Remotion was evaluated: same approach, but its licence needs a paid Company
+License above 3 employees. AI image/video APIs are not connected (no credentials, hosts blocked); costs are documented.
+Rule: never call procedural output "AI-generated".
