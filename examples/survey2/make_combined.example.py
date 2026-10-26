@@ -50,7 +50,8 @@ words = [dict(w, s=round(w["s"] + 0.25, 3), e=round(w["e"] + 0.25, 3)) for sg in
          if w["e"] <= SURVEY_END]
 for w in words:
     if w["w"] == "סיוט" and 52 < w["s"] < 54: w["w"] = "זה סיוט."
-    if w["w"] == "משתמשות?" and 97 < w["s"] < 99: w["s"], w["e"] = 97.95, 98.2
+    if w["w"] == "משתמשות?" and 97 < w["s"] < 99: w["s"], w["e"] = 97.95, 98.38
+    if w["w"] == "קרה" and 67.5 < w["s"] < 68.6: w["s"], w["e"] = 68.56, 68.74  # after Maya's "אה..."
     if w["w"] == "אותי," and 79.9 < w["s"] < 80.2: w["s"], w["e"] = min(w["s"], 79.95), min(w["e"], 80.08)
 words = [w for w in words if not ((w["w"] == "לא" and 52.8 < w["s"] < 53.0) or (w["w"] == "דבר" and 95.9 < w["s"] < 96.1))]
 for sg in nm["segments"]:

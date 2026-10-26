@@ -300,3 +300,7 @@ re-transcription on the clean audio (clearer words), then cutting.
 - Two-shot of both girls (face_x 0.3), Maya close-up (0.75), cold open on "האמת היא שהתחננתי שהיא תקבל אותי".
 - New vanim modules: BookingLoop (books the next one each time), CheckOff (stuck mid-day → tick it off),
   PleaChat (begging messages → referral), SearchFrenzy (search results all "אין זמינות"). BigButton → "ברור שכן!".
+- Video 5 v2: Maya's "אמממ" before Q3: re-transcription showed "אה..." 67.98–68.38 that whisper had merged into
+  "קרה"; clip now starts 68.50. "הייתן משתמשות" was cut: the word runs to 98.38, the clip ended 98.22 (energy
+  threshold too strict on the tail); now 98.44. Rule: before every clip start, look for a filler word that
+  whisper merged into the next one; for clip ends, use the 20 ms energy tail, not the run detector.

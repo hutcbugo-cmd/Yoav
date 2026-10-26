@@ -26,13 +26,13 @@ clips = [
     sv(44.78, 47.16, MAYA, note="Q2: מה הכי מעצבן אתכם בלקבוע תור לציפורניים?"),
     sv(47.82, 49.2, GIRLS, note="A2: שאני צריכה להגיע לתור."),
     sv(52.98, 55.96, GIRLS, ZP, note="A2: זה סיוט. כאילו, אני מתה לעשות על זה וי ולהתקדם."),
-    sv(67.88, 73.0, MAYA, note="Q3: קרה לכם מקרה שהייתם צריכות לקבוע תור דחוף… ולא הייתה אף אחת פנויה?"),
+    sv(68.5, 73.0, MAYA, note="Q3: קרה לכם מקרה שהייתם צריכות לקבוע תור דחוף… ולא הייתה אף אחת פנויה?"),
     sv(74.78, 75.58, GIRLS, note="A3: האמת שכן."),
     sv(76.86, 77.72, MAYA, note="Q: ומה עשיתם?"),
     sv(77.98, 83.22, GIRLS, ZP, note="A3: האמת היא שהתחננתי שהיא תקבל אותי, ואז היא סידרה לי איזה חברה שלה או משהו, זה היה לא נעים"),
     sv(86.36, 89.1, GIRLS, note="A3b: אותה סיטואציה. התחלתי לחפש מלא באינטרנט."),
     sv(90.28, 94.16, MAYA, note="Q4: אם הייתן יכולות למצוא מישהי בלחיצת כפתור באפליקציה"),
-    sv(96.18, 98.22, MAYA, ZP, note="Q4: כשהיא מגיעה אליכן הביתה, הייתן משתמשות?"),
+    sv(96.18, 98.44, MAYA, ZP, note="Q4: כשהיא מגיעה אליכן הביתה, הייתן משתמשות?"),
     sv(98.84, 99.98, GIRLS, ZP, note="A4: ברור שכן."),
     sv(100.5, 101.02, GIRLS, note="A4: בטח."),
 ]
@@ -76,7 +76,7 @@ p["popups"] = [
 ]
 # sounds: riser into "Nomi", whoosh on each question and into Maya's part
 p["sfx"] = [dict(s, at=comb(s["at"])) for s in nomi["sfx"] if s["name"] == "riser" and s["at"] == 114.84]
-for t in (28.58, 44.78, 67.88, 90.28):
+for t in (28.58, 44.78, 68.5, 90.28):
     p["sfx"].append({"name": "whoosh2", "at": t, "gain_db": -20, "dur": 0.6, "align": "peak", "lead": 0.3})
 p["sfx"].append({"name": "riser", "at": 28.58, "gain_db": -9, "dur": 1.4, "align": "end"})  # rise up through the hook into Q1
 p["sfx"].append({"name": "impact", "at": 28.58, "gain_db": -14, "dur": 1.0, "align": "peak", "lead": 0.02})
