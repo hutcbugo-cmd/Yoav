@@ -51,6 +51,38 @@ def track_faces(src, meta, cache, fps=4):
     return out
 
 
+def track_faces_all(src, meta, cache, fps=4):
+    """Every face per sampled frame -> [(t, [[cx, top, h], ...])], for two-person shots."""
+    if os.path.exists(cache):
+        with open(cache) as f:
+            return json.load(f)
+    import cv2
+    w, h = 540, round(540 * meta["h"] / meta["w"] / 2) * 2
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", src, "-vf", f"fps={fps},scale={w}:{h}",
+                          "-f", "rawvideo", "-pix_fmt", "bgr24", "-"], capture_output=True, check=True).stdout
+    frames = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3)
+    det = cv2.FaceDetectorYN.create(FACE_MODEL, "", (w, h), 0.5)
+    out = []
+    for i, fr in enumerate(frames):
+        _, faces = det.detect(fr)
+        out.append([i / fps, [[float((x + fw / 2) / w), float(y / h), float(fh / h)]
+                              for x, y, fw, fh in (faces[:, :4] if faces is not None else [])]])
+    with open(cache, "w") as f:
+        json.dump(out, f)
+    return out
+
+
+def faces_near(all_faces, face_x, tol=0.22):
+    """Track of the person standing near `face_x` (0..1): per frame the face closest to it."""
+    out = []
+    for t, fs in all_faces:
+        near = [f for f in fs if abs(f[0] - face_x) <= tol]
+        if near:
+            cx, top, h = min(near, key=lambda f: abs(f[0] - face_x))
+            out.append([t, cx, top, h])
+    return out
+
+
 SEG_MODEL = os.path.join(HERE, "assets/models/human_segmentation_pphumanseg_2023mar.onnx")
 
 
@@ -569,9 +601,15 @@ def main():
         inputs += ["-ss", f"{c['s']:.4f}", "-t", f"{c['e'] - c['s'] + 0.2:.4f}", "-i", src]
     vparts, aparts, labels = [], [], []
     report = []
+    all_faces = None
     for i, c in enumerate(clips):
         d = c["e"] - c["s"]
-        fc = clip_face(faces, c["s"], c["e"]) or {"cx": 0.5, "cx_min": 0.5, "cx_max": 0.5, "top": 0.25, "h": 0.2}
+        faces_c = faces
+        if "face_x" in c:  # two people in the shot: frame the one standing near face_x
+            if all_faces is None:
+                all_faces = track_faces_all(src, meta, os.path.join(work, f"faces_all_{os.path.basename(src)}.json"))
+            faces_c = faces_near(all_faces, c["face_x"]) or faces
+        fc = clip_face(faces_c, c["s"], c["e"]) or {"cx": 0.5, "cx_min": 0.5, "cx_max": 0.5, "top": 0.25, "h": 0.2}
         z0 = base * c.get("zoom", 1.0)
         z1 = base * c.get("punch_zoom", c.get("zoom", 1.0))
         tp = (c["punch_at"] - c["s"]) if "punch_at" in c else 0.0
@@ -586,11 +624,12 @@ def main():
         # follow the face: smoothed per-frame horizontal centre (a per-clip median left her
         # >6 % off-centre in 22 % of frames), and anchor zooms on the face centre so a
         # punch-in grows around her face instead of around the top of the frame
-        cx_expr = face_track_expr(faces, c["s"], c["e"], fc["cx"]) if plan.get("framing", {}).get("track", True) \
+        cx_expr = face_track_expr(faces_c, c["s"], c["e"], fc["cx"]) if plan.get("framing", {}).get("track", True) \
             else f"{fc['cx']:.4f}"
-        if body_w:  # a leaning presenter: centre between face and torso, not on the face alone
-            off = body_offset(src, meta, c["s"], c["e"], faces, os.path.join(work, "body_offsets.json"))
-            cx_expr = f"({cx_expr})+{body_w * off:.4f}"
+        bw_c = c.get("body_weight", body_w)
+        if bw_c:  # a leaning presenter: centre between face and torso, not on the face alone
+            off = body_offset(src, meta, c["s"], c["e"], faces_c, os.path.join(work, "body_offsets.json"))
+            cx_expr = f"({cx_expr})+{bw_c * off:.4f}"
         face_cy = fc["top"] + fc["h"] / 2
         target_cy = plan.get("framing", {}).get("face_center_y", face_top + fc["h"] * base / 2)
         # positions come from the zoom expression itself, not iw/ih: crop keeps the frame
@@ -600,7 +639,8 @@ def main():
         x = f"min(max(({cx_expr})*{zw}-{W / 2},0),{zw}-{W})"
         y = f"min(max({face_cy:.4f}*{zh}-{target_cy * H:.1f},0),{zh}-{H})"
         vparts.append(f"[{i}:v]trim=duration={d:.4f},setpts=PTS-STARTPTS,{scale},"
-                      f"crop={W}:{H}:x='{x}':y='{y}',setsar=1,fps={meta['fps']:.5f}[v{i}]")
+                      f"crop={W}:{H}:x='{x}':y='{y}',setsar=1,fps={meta['fps']:.5f}"
+                      + (f",{c['grade']}" if c.get("grade") else "") + f"[v{i}]")  # per-clip colour grade
         # level each clip's dialogue to a common RMS so interviewer / interviewee match
         g0 = i  # level the whole take (run of joined sub-shots) with one gain, so joins stay seamless
         while g0 > 0 and clips[g0].get("joined"):

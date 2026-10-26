@@ -251,3 +251,21 @@ New cues on its words: NailPainting on "לק ג'ל, מניקור", HomeCozy door
 Rule: anchor cues to source times, so one approved edit can take any hook.
 Hook 2 approved by the client ("כן").
 Final files: nomi_v9_hook1.mp4, nomi_v9_hook2.mp4 (scratchpad/video3).
+
+## Video 4 — street survey (Maya asks one passer-by 4 questions) + Maya's Nomi app explanation
+Client: fast cuts, best answers marked first, Nomi-style captions, good colour and sound, new animations on what
+they talk about, end with Maya's app explanation from the Nomi shoot, at most a minute. "Don't make it a
+million rounds of fixes."
+Built (53.4 s, −13.7 LUFS):
+- `make_combined.py`: one combined source = survey take + 5 Nomi segments (levelled copy), with a merged
+  transcript (corrections applied), so `vplan` keeps working on a single source.
+- vplan: per-clip `face_x` (two-person shot: frame the face nearest that x, from `track_faces_all`),
+  per-clip `grade` (S-curve + saturation dehaze for the hazy rooftop footage) and per-clip `body_weight`.
+- Cold open on the strongest line ("…אז נסעתי לבאר שבע ללק"), then Q/A cut tight: Maya's question in close-up,
+  the answer in close-up, the reaction in the wide two-shot. Clip starts measured by voicing (Q4 "אם" at 44.18,
+  not whisper's 43.72).
+- New vanim modules: DaysCounter (3–4 weeks), ChatWait (WhatsApp wait), RoadTrip (centre → Be'er Sheva, km
+  counter, "בשביל לק?!"), BigButton (press on "בלחיצת כפתור", "ברור!" stamp).
+- Music: groove from the top, then the drop lands again on Maya's "Nomi".
+Limits: wide 1080p source, so close-ups are digital zoom ≤1.9×. Maya stands at the frame edge (x 0.22), so her
+close-up can't be fully centred.
