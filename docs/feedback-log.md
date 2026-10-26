@@ -229,3 +229,11 @@ Rule: default overlay position is centre-chest, not the side. Check the start of
 | Silence before "בלי לשווק את עצמך" | Whisper put "בלי" at 310.45; re-transcribing the 2.6 s snippet put the real onset at 310.70 (breath before it); the snap trusted the early time | clip starts at 310.66 with per-clip `snap_start: false` (new option for measured cuts) |
 | Animations touch her face and are a bit small | centred overlays had to fit between chin and captions at 0.70 H | captions down to 0.77 H; overlays down and bigger (squares w 0.62 at y 0.52, phone w 0.46, nail w 0.6) |
 Note: QC frames past the end of the video return a misleading frame; check the duration first.
+
+## Round 18 — Nomi v8 hook 1 ("almost approved")
+| Client note | Root cause | Fix |
+|---|---|---|
+| Silence before "בלי לשווק" still there | round 17 trimmed only 0.3 s. Pitch tracking showed no voicing 310.60–311.26 (wind noise kept the energy up, so energy-based checks saw "speech"); "בלי" is voiced from 311.29. Whisper had stretched "בלי" over the noise | clip starts 311.22; review `fix` can now retime a word (`s`/`e`) so the caption keeps "בלי"; "שלך" → "בלי" now 0.33 s |
+| Captions too low now; smaller gap to the animations | 0.77 H overcorrected | captions 0.745 H; tagline logos raised to y 0.485 |
+| (found while fixing) a dry run overwrote the shared `timeline.json` the plan builder reads → every later cue shifted (render failed on 413.56) | one file for all plans | `--dry` writes `timeline_<plan>.json`; builder reads the v3 timeline; late cues anchored by source time |
+Rule: find pauses with voicing (pitch), not energy. Wind noise hides silence from energy measurements.

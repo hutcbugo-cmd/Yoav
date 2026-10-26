@@ -254,6 +254,7 @@ def is_question(words):
 def apply_review(tr, review):
     """Hand / AI review of the transcript, keyed by time so word timings survive:
       "fix":    [{"t": 96.9, "from": "אלחלת,", "to": "אל-חלד,"}]  word nearest t (to "" deletes it)
+                {"t": 311.0, "from": "בלי", "to": "בלי", "s": 311.27, "e": 311.48}  optional s/e retime it
       "delete": [[62.3, 62.95]]   drop every word in the range (e.g. a hallucinated line)
       "question" / "answer": [[start, end], ...]   force the label of words in the range"""
     # "terms": {"L&P": ["NLP", "L&B"]} - brand / name glossary, applied everywhere. Whisper
@@ -282,6 +283,8 @@ def apply_review(tr, review):
             print(f"review: no word {fx['from']!r} near {fx['t']}s - skipped", file=sys.stderr)
             continue
         w = min(cands, key=lambda w: abs((w["s"] + w["e"]) / 2 - fx["t"]))
+        if "s" in fx or "e" in fx:  # measured timing (whisper stretched a word over noise)
+            w["s"], w["e"] = fx.get("s", w["s"]), fx.get("e", w["e"])
         if fx["to"]:
             w["w"] = fx["to"]
         else:

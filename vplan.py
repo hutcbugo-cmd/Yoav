@@ -549,7 +549,10 @@ def main():
     if a.dry:
         timeline = [{"w": w["w"], "out": round(w["s"], 2), "src": round(w["s"] - o + c["s"], 2), "clip": i + 1}
                     for i, (c, o, ws) in enumerate(zip(clips, offsets, words_by_clip)) for w in ws]
-        with open(os.path.join(work, "timeline.json"), "w", encoding="utf-8") as f:
+        # one file per plan: a shared timeline.json was overwritten by a dry run of an edited
+        # plan, and a builder that read it shifted every later cue
+        name = os.path.splitext(os.path.basename(a.plan))[0]
+        with open(os.path.join(work, f"timeline_{name}.json"), "w", encoding="utf-8") as f:
             json.dump(timeline, f, ensure_ascii=False, indent=0)
         print("\n".join(f"{x['out']:6.2f}  (src {x['src']:7.2f})  {x['w']}" for x in timeline))
         print(f"total {total:.2f} s")
