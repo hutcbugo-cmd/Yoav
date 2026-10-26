@@ -42,7 +42,8 @@ vedit.apply_review(sv, {"fix": [
     {"t": 8.65, "from": "נוצאת", "to": "יוצאת"}, {"t": 37.9, "from": "ללאק.", "to": "ללק."},
     {"t": 23.14, "from": "לך", "to": "לחכות"}, {"t": 23.3, "from": "כבוד", "to": ""},
     {"t": 44.79, "from": "הייתי", "to": "היית"},
-    {"t": 7.05, "from": "שלושה", "to": "שלושה–ארבעה"}, {"t": 7.7, "from": "-ארבעה", "to": ""}]})
+    {"t": 7.05, "from": "שלושה", "to": "שלושה–ארבעה"}, {"t": 7.7, "from": "-ארבעה", "to": ""},
+    {"t": 16.93, "from": "של", "to": "של", "s": 17.09, "e": 17.33}]})
 nm = json.load(open(f"{V3}/transcript.json"))
 vedit.apply_review(nm, json.load(open(f"{V3}/review.json")))
 words = [w for sg in sv["segments"] for w in sg["words"] if w["e"] <= SURVEY_END]

@@ -453,7 +453,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             for i, x in enumerate(c):
                 s = x["s"] if i else start
                 e = c[i + 1]["s"] if i + 1 < len(c) else end
-                if e - s < 0.02:
+                if mode == "plain" and not i:
+                    e = end  # one event per chunk: its length is the chunk's, not its first word's
+                if e - s < 0.02:  # (a 0.02 s first word "אז" used to drop the whole plain chunk)
                     continue
                 if mode == "plain":
                     if i:  # one event per caption chunk; no per-word change
@@ -650,14 +652,19 @@ def main():
             g1 += 1
         seg = audio[int(clips[g0]["s"] * 16000):int(clips[g1]["e"] * 16000)]
         rms = 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-9)
-        gain = float(np.clip(st.get("dialog_rms", -20) - rms, -6, 9))
+        if c.get("afilter"):  # windy take: level what is left after the clean-up, not the wind
+            rms_f = filtered_rms(src, clips[g0]["s"], clips[g1]["e"], c["afilter"])
+            gain = float(np.clip(st.get("dialog_rms", -20) - rms_f, -6, 12))
+        else:
+            gain = float(np.clip(st.get("dialog_rms", -20) - rms, -6, 9))
         # 15 ms fades on clean cuts; 40 ms where the cut had to land inside continuous speech
         def edge_fade(t):
             lvl = 20 * np.log10(np.sqrt(np.mean(audio[int(t * 16000) - 160:int(t * 16000) + 160] ** 2)) + 1e-9)
             return min(0.04 if lvl > rms - 12 else 0.015, d / 4)
         fi = 0.0 if c.get("joined") else edge_fade(c["s"])
         fo = 0.0 if (i + 1 < len(clips) and clips[i + 1].get("joined")) else edge_fade(c["e"])
-        aparts.append(f"[{i}:a]atrim=duration={d:.4f},asetpts=PTS-STARTPTS,volume={gain:.2f}dB"
+        aparts.append(f"[{i}:a]atrim=duration={d:.4f},asetpts=PTS-STARTPTS,"
+                      + (f"{c['afilter']}," if c.get("afilter") else "") + f"volume={gain:.2f}dB"
                       + (f",afade=t=in:d={fi:.3f}" if fi else "") + (f",afade=t=out:st={d - fo:.3f}:d={fo:.3f}" if fo else "")
                       + f"[a{i}]")
         labels.append(f"[v{i}][a{i}]")
@@ -973,6 +980,14 @@ def snap_clip(c, words, audio, fps, sr=16000, start=True, end=True):
         c["s"] = round(tight(max(prev_e - 0.03, first["s"] - 0.25), first["s"] + 0.04, "start"), 4)
     if end:
         c["e"] = round(tight(last["e"] - 0.04, min(next_s + 0.03, last["e"] + 0.25), "end"), 4)
+
+
+def filtered_rms(src, s, e, af):
+    """RMS (dBFS) of a source range after the clip's audio filter (e.g. RNNoise wind removal)."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", src, "-af", af,
+                          "-ac", "1", "-ar", "16000", "-f", "s16le", "-"], capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, np.int16).astype(np.float32) / 32768
+    return 20 * np.log10(np.sqrt(np.mean(x ** 2)) + 1e-9) if len(x) else -60.0
 
 
 def vedit_audio(path):

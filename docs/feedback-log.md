@@ -269,3 +269,14 @@ Built (53.4 s, −13.7 LUFS):
 - Music: groove from the top, then the drop lands again on Maya's "Nomi".
 Limits: wide 1080p source, so close-ups are digital zoom ≤1.9×. Maya stands at the frame edge (x 0.22), so her
 close-up can't be fully centred.
+- Video 4 v2 (client notes, all fixed and verified one by one):
+  | Note | Root cause | Fix |
+  |---|---|---|
+  | Hook needs captions | plain mode dropped a chunk whose first word lasted 0.02 s ("אז") — also lost "אז נסעתי לבאר שבע ללק" in the answer | chunk length = chunk end, not first word |
+  | Hook: hear her more, add a rise-up | wind as loud as her voice; no build-up | riser ending on Q1 + impact; per-clip leveling after clean-up |
+  | Wind loud, interview barely audible | wind ≈ speech level (pause −17.3 vs speech −16.8 LUFS); light afftdn did nothing | per-clip `afilter`: RNNoise `bd.rnnn` (mix 0.9) + presence; wind in pauses −46.5 LUFS. Gain measured after the filter (`filtered_rms`) |
+  | Survey colour over-saturated | S-curve + sat 1.3 | gentler curve, sat 1.1 |
+  | "הזמינות" cut off | clip ended at whisper's word end; the voice runs 16.10–16.95 | 15.98–16.98, no snap; "של" retimed so the caption matches |
+  | Maya's "אמ" before Q4 | voiced 44.22–44.37 | Q4 starts 44.56 ("היית יכולה…") |
+  | Road-trip animation in the hook too | — | fast RoadTrip in the cold open |
+  | Odd 0.3 s shot of Maya after "Nomi" | clip 122.91 ("את", 0.34 s) | removed; phone re-timed so it doesn't hit the logo or the portfolio |

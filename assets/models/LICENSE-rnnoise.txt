@@ -1,0 +1,4 @@
+RNNoise models for FFmpeg's arnndn filter, from https://github.com/richardpl/arnndn-models
+- std.rnnn: the model bundled with Xiph RNNoise (BSD-3-Clause, Copyright Xiph.Org Foundation, Jean-Marc Valin).
+- bd.rnnn: trained by Gregor Richards on the RNNoise code (rnnoise-nu). The repo has no LICENSE file: treat its
+  terms as unconfirmed. It is used here only as a processing tool, and the model itself is not redistributed in deliverables.

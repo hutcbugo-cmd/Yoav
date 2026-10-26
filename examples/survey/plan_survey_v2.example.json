@@ -1,0 +1,595 @@
+{
+ "source": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video4/combined.mp4",
+ "work": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/video4/work",
+ "sfx_dir": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/sfx",
+ "style": {
+  "font": "Assistant ExtraBold",
+  "font_file": "/home/user/Yoav/assets/fonts/Assistant-800.ttf",
+  "caption_mode": "plain",
+  "fill_color": "#FF2E8B",
+  "stroke_color": "#000000",
+  "stroke": 0.07,
+  "caption_y": 0.72,
+  "caption_size": 0.14,
+  "cap_max_words": 6,
+  "cap_max_chars": 20,
+  "accent": "#FF2E8B",
+  "popup_size": 0.09,
+  "popup_y": 0.53,
+  "lufs": -14,
+  "dialog_rms": -20,
+  "sfx_gain_db": -3
+ },
+ "framing": {
+  "base_zoom": 1.225,
+  "face_top": 0.13,
+  "face_center_y": 0.25,
+  "track": true,
+  "roll_deg": 0.0,
+  "body_weight": 0.5
+ },
+ "clips": [
+  {
+   "s": 36.84,
+   "e": 38.12,
+   "face_x": 0.76,
+   "zoom": 1.45,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "COLD OPEN: אז נסעתי לבאר שבע ללק"
+  },
+  {
+   "s": 0.0,
+   "e": 2.36,
+   "face_x": 0.22,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "Q1: אז כמה זמן לוקח לך להזמין טיפול ציפורניים?"
+  },
+  {
+   "s": 6.53,
+   "e": 8.35,
+   "face_x": 0.76,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "A1: שלושה-ארבעה שבועות."
+  },
+  {
+   "s": 8.35,
+   "e": 10.25,
+   "face_x": 0.76,
+   "zoom": 1.55,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "A1: אני יוצאת מתור וקובעת כבר לתור הבא."
+  },
+  {
+   "s": 11.77,
+   "e": 14.63,
+   "face_x": 0.22,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "Q2: מה הכי מעצבן אותך בלקבוע תור לטיפול ציפורניים?"
+  },
+  {
+   "s": 15.98,
+   "e": 16.98,
+   "face_x": 0.76,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "snap_start": false,
+   "snap_end": false,
+   "note": "A2: הזמינות"
+  },
+  {
+   "s": 17.7,
+   "e": 23.94,
+   "face_x": 0.76,
+   "zoom": 1.55,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "A2: אני לא אצל מישהי שמשתמשת באפליקציה נגיד, אז זה בוואטסאפ, אז אני צריכה לחכות שהיא תענה לי"
+  },
+  {
+   "s": 26.43,
+   "e": 30.61,
+   "face_x": 0.22,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "Q3: קרה לך שהיית צריכה טיפול ממש דחוף ולא הייתה אף אחת פנויה?"
+  },
+  {
+   "s": 31.36,
+   "e": 32.02,
+   "face_x": 0.76,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "snap_start": false,
+   "note": "A3: כן, זה קרה לי,"
+  },
+  {
+   "s": 33.22,
+   "e": 38.12,
+   "face_x": 0.76,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "punch_at": 36.86,
+   "punch_zoom": 1.6,
+   "note": "A3: הייתי גרה בבאר שבע… אז נסעתי לבאר שבע ללק."
+  },
+  {
+   "s": 38.6,
+   "e": 40.08,
+   "face_x": 0.22,
+   "zoom": 0.8163,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "REACT (wide two-shot): וואו, זה אחד המושקעים."
+  },
+  {
+   "s": 44.56,
+   "e": 49.12,
+   "face_x": 0.22,
+   "zoom": 1.39,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "snap_start": false,
+   "note": "Q4: אם היית יכולה להזמין… בלחיצת כפתור היית רוצה?"
+  },
+  {
+   "s": 49.2,
+   "e": 49.68,
+   "face_x": 0.76,
+   "zoom": 1.6,
+   "grade": "curves=all='0/0 0.25/0.23 0.75/0.77 1/1',eq=saturation=1.1,colorbalance=rm=0.01:bm=-0.015,unsharp=5:5:0.3",
+   "afilter": "highpass=f=120,arnndn=m=/home/user/Yoav/assets/models/bd.rnnn:mix=0.9,equalizer=f=3500:t=q:w=1.2:g=2",
+   "body_weight": 0.0,
+   "drift": 0.03,
+   "note": "A4: ברור."
+  },
+  {
+   "s": 57.32,
+   "e": 60.32,
+   "zoom": 1.0,
+   "note": "MAYA: HOOK: אז בשביל זה בדיוק המצאנו את האפליקציה Nomi",
+   "punch_at": 60.16,
+   "punch_zoom": 1.22,
+   "drift": 0.03
+  },
+  {
+   "s": 63.77,
+   "e": 70.04,
+   "zoom": 1.2,
+   "note": "MAYA: APP: נכנסת לאפליקציה, מוצאת את המניקוריסטית שאת רוצה לפי המרחק, הדירוג, ויכולה לראות את תיק העבודות שלה",
+   "drift": 0.03
+  },
+  {
+   "s": 72.04,
+   "e": 74.59,
+   "zoom": 1.0,
+   "note": "MAYA: APP: את יכולה להתכתב איתה, לראות מתי היא פנויה,",
+   "drift": 0.03
+  },
+  {
+   "s": 75.88,
+   "e": 77.24,
+   "zoom": 1.2,
+   "note": "MAYA: APP: לקבוע לפי מה שנוח לך,",
+   "drift": 0.03
+  },
+  {
+   "s": 79.26,
+   "e": 83.29,
+   "zoom": 1.0,
+   "note": "MAYA: APP: המניקוריסטיות כמובן מאומתות אצלנו, ואתם יכולים לראות לפי דירוגים.",
+   "punch_at": 80.8,
+   "punch_zoom": 1.12,
+   "drift": 0.03
+  },
+  {
+   "s": 85.12,
+   "e": 86.24,
+   "zoom": 1.2,
+   "note": "MAYA: CTA: תורידו כאן את Nomi.",
+   "punch_at": 85.72,
+   "punch_zoom": 1.24,
+   "drift": 0.03
+  }
+ ],
+ "popups": [
+  {
+   "kind": "anim",
+   "name": "RoadTrip",
+   "at": 36.84,
+   "params": {
+    "drive_at": 0.45,
+    "nail_at": 1.0,
+    "hold": 0.1
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.66,
+   "x": 0.5,
+   "y": 0.5,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "RoadTrip",
+   "at": 33.3,
+   "params": {
+    "drive_at": 3.6,
+    "nail_at": 4.5,
+    "hold": 0.1
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.66,
+   "x": 0.5,
+   "y": 0.5,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "DaysCounter",
+   "at": 6.5,
+   "params": {
+    "flips_end": 1.3,
+    "label_at": 1.4,
+    "hold": 1.4
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.66,
+   "x": 0.5,
+   "y": 0.5,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "ChatWait",
+   "at": 21.4,
+   "params": {
+    "hold": 0.1
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.66,
+   "x": 0.5,
+   "y": 0.5,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "BigButton",
+   "at": 47.2,
+   "params": {
+    "press_at": 0.45,
+    "answer_at": 2.0,
+    "hold": 0.3
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.66,
+   "x": 0.5,
+   "y": 0.5,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "LogoReveal",
+   "at": 59.86,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "hold": 0.0
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.58,
+   "x": 0.5,
+   "y": 0.495,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "SmartphoneAppReveal",
+   "at": 64.64,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "exit_at": 2.65,
+    "_timemap": [
+     [
+      0,
+      0
+     ],
+     [
+      0.75,
+      1.25
+     ],
+     [
+      1.1,
+      2.05
+     ],
+     [
+      1.4,
+      2.45
+     ],
+     [
+      3.6,
+      2.65
+     ],
+     [
+      4.05,
+      3.1
+     ]
+    ]
+   },
+   "size": [
+    900,
+    1500
+   ],
+   "w": 0.42,
+   "x": 0.5,
+   "y": 0.505,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "PortfolioGallery",
+   "at": 68.75,
+   "params": {
+    "hold": 0.4,
+    "photos": [
+     {
+      "src": "assets/brands/nomi/portfolio/sage.jpg",
+      "pos": "55% 32%"
+     },
+     {
+      "src": "assets/brands/nomi/portfolio/nude_shimmer.jpg",
+      "pos": "45% 60%"
+     },
+     {
+      "src": "assets/brands/nomi/portfolio/milky_white.jpg",
+      "pos": "35% 55%"
+     }
+    ]
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.58,
+   "x": 0.5,
+   "y": 0.495,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "SmartphoneAppReveal",
+   "at": 73.12,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "content_offset": 2.85,
+    "_timemap": [
+     [
+      0,
+      0
+     ],
+     [
+      0.95,
+      1.2
+     ],
+     [
+      3.65,
+      3.9
+     ],
+     [
+      4.1,
+      4.35
+     ]
+    ]
+   },
+   "size": [
+    900,
+    1500
+   ],
+   "w": 0.42,
+   "x": 0.5,
+   "y": 0.505,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "VerifiedStars",
+   "at": 80.54,
+   "params": {
+    "check_at": 0.25,
+    "stars_at": 2.45,
+    "hold": 0.0,
+    "_timemap": [
+     [
+      0,
+      0
+     ],
+     [
+      2.3,
+      2.45
+     ],
+     [
+      2.6,
+      3.35
+     ],
+     [
+      2.9,
+      3.65
+     ]
+    ]
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.58,
+   "x": 0.5,
+   "y": 0.495,
+   "sfx_gain_db": -5
+  },
+  {
+   "kind": "anim",
+   "name": "LogoReveal",
+   "at": 85.12,
+   "params": {
+    "logo": "assets/brands/nomi/logo_icon.png",
+    "tagline": "הורידו עכשיו",
+    "hold": 1.2,
+    "exit": false
+   },
+   "size": [
+    800,
+    800
+   ],
+   "w": 0.58,
+   "x": 0.5,
+   "y": 0.465,
+   "sfx_gain_db": -5
+  }
+ ],
+ "flashes": [
+  {
+   "at": 60.16,
+   "dur": 0.3
+  }
+ ],
+ "music": {
+  "file": "/tmp/claude-0/-home-user-Yoav/730ded80-32ca-5134-9de8-8bc6d8b574d9/scratchpad/mixkit/m228.mp3",
+  "title": "Fashion — Arulo (Mixkit Stock Music Free License)",
+  "gain_db": -11,
+  "duck_ratio": 5,
+  "duck_threshold": 0.04,
+  "sections": [
+   {
+    "out_until": 57.32,
+    "track_start": 0.0,
+    "fade_in": 0.02,
+    "fade_out": 0.6
+   },
+   {
+    "out_from": 57.32,
+    "sync": {
+     "src": 60.16,
+     "track": 18.28
+    },
+    "fade_in": 0.4,
+    "fade_out": 1.0
+   }
+  ]
+ },
+ "sfx": [
+  {
+   "name": "riser",
+   "at": 60.16,
+   "gain_db": -15,
+   "dur": 2.0,
+   "align": "peak",
+   "lead": 1.8
+  },
+  {
+   "name": "whoosh2",
+   "at": 0.0,
+   "gain_db": -20,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 11.77,
+   "gain_db": -20,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 26.43,
+   "gain_db": -20,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "whoosh2",
+   "at": 44.56,
+   "gain_db": -20,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  },
+  {
+   "name": "riser",
+   "at": 0.0,
+   "gain_db": -9,
+   "dur": 1.4,
+   "align": "end"
+  },
+  {
+   "name": "impact",
+   "at": 0.0,
+   "gain_db": -14,
+   "dur": 1.0,
+   "align": "peak",
+   "lead": 0.02
+  },
+  {
+   "name": "whoosh",
+   "at": 57.32,
+   "gain_db": -18,
+   "dur": 0.6,
+   "align": "peak",
+   "lead": 0.3
+  }
+ ]
+}
