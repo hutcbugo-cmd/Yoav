@@ -188,7 +188,7 @@ export default {
     S = { W, H, color: params.color || "#FF2E8B", skin: params.skin || "#e2a284",
           exit: params.exit !== false };
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(params.supersample || 1.5);
+    renderer.setPixelRatio(params.supersample || 1.25);  // 1.5 looked the same, 25 % slower
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;

@@ -27,15 +27,28 @@ info.json {w, h, fps, n, duration, sfx: [{t, name, gain}]}
 - Sound: each animation lists its cues. Clicks, pops and impacts are aligned on their peak,
   and the rest start on the cue. Sounds missing from the library are synthesised (`brush`).
 - Standalone preview: `python3 vanim.py <Name> --sfx-dir … -o out.mp4 [--bg footage.mp4 …]`.
-- Cost: on 4 CPU cores, NailPainting renders 126 frames at 900² in about 65 s, and
-  SmartphoneAppReveal renders 216 frames at 900×1500 in about 55 s.
+- Cost on 4 CPU cores: NailPainting renders 126 frames at 900² in about 45 s (supersample 1.25), and
+  SmartphoneAppReveal renders 216 frames at 900×1500 in about 39 s (4 browser workers; WebGL is CPU-bound, so workers don't help 3D).
+  Renders are cached, so a re-cut only re-renders what changed.
 
 ## Library (status)
 | Animation | Technique | Status |
 |---|---|---|
 | NailPainting | three.js 3D: bent nail-plate mesh, polish painted into its texture by the brush strokes, clearcoat + studio reflections, gloss sweep, sparkles | built (Demo A) |
 | SmartphoneAppReveal | CSS 3D phone with a real HTML Hebrew UI: splash → search → results → profile → date/time → confirmation tick + confetti | built (Demo B) |
-| CoinBurst, AppointmentBooking (calendar only), BeautyTransformation, ProductPopUp, SparkleReveal | same contract | next, after approval |
+| LogoReveal | client app icon flips in on the beat (lands at 0.3 s), ring, burst, wordmark, optional tagline pill | built (Nomi v4) |
+| CalendarFull | slots struck with drawn red X's, accelerating, then "אין תורים" stamp + shake | built |
+| HomeCozy | house bounces in, door shuts, window glows, moon, drifting Zzz (SVG) | built |
+| ChatSend | photo bubble flies in, read ticks, typing dots, reply | built |
+| VibeToggle | quiet/fun switch timed to the two words, colour shift, notes and bubbles burst | built |
+| VerifiedStars | shield flip, tick draws, "verified" pill, stars fill, score counts up | built |
+| MapCustomers | map tilts in, pin drops with ripples, customers pop and link, count pill | built |
+| NoNeed | icon cards slashed red on their words, grey out | built |
+| CoinBurst, BeautyTransformation, ProductPopUp | same contract | next |
+
+Timing: `_speed` and `_timemap` ([[out_t, anim_t], …]) retime any module so its beats land on words.
+`vplan.py plan.json --dry` prints every word's output time; `examples/build_nomi_v4.example.py` turns
+word times into source-time cues. `--draft` renders at half resolution for a quick look.
 | Older presets in `vmotion.py` (slam, stamp_x, chips, logo, cta) | Pillow frames | kept, still used |
 
 ## Options evaluated

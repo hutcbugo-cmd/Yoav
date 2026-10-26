@@ -68,6 +68,9 @@ def synth_sfx(name, cache_dir):
         af = ("anoisesrc=d=0.45:c=pink:r=48000:a=0.6,highpass=f=1800,lowpass=f=7000,"
               "afade=t=in:d=0.08:curve=qsin,afade=t=out:st=0.18:d=0.27:curve=qsin,"
               "tremolo=f=11:d=0.25")
+    elif name == "swipe":  # marker slash: fast rising band-passed noise, ~0.22 s
+        af = ("anoisesrc=d=0.22:c=white:r=48000:a=0.5,bandpass=f=2600:width_type=o:w=1.4,"
+              "afade=t=in:d=0.03,afade=t=out:st=0.08:d=0.14,vibrato=f=7:d=0.3")
     else:
         raise ValueError(f"no synthesised sound '{name}'")
     os.makedirs(cache_dir, exist_ok=True)

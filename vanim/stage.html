@@ -29,13 +29,32 @@ window.__setup = async (params, W, H) => {
   root.style.height = H + "px";
   await document.fonts.load('800 40px "Assistant"');
   await document.fonts.load('700 40px "Assistant"');
-  const info = await mod.setup(root, params, W, H);
+  // Engine-level retiming, so an animation's beats land on the spoken words:
+  //   _speed: plays faster (>1) or slower (<1)
+  //   _timemap: [[out_t, anim_t], ...] piecewise-linear, increasing; flat-ish segments hold a
+  //             beat (e.g. keep the results list up until she says "portfolio")
+  const info = Object.assign({}, await mod.setup(root, params, W, H));
+  const speed = params._speed || 1;
+  const map = params._timemap || [[0, 0], [info.duration / speed, info.duration]];
+  const interp = (x, xs, ys) => {
+    if (x <= xs[0]) return ys[0] + (x - xs[0]) * (ys[1] - ys[0]) / (xs[1] - xs[0] || 1);
+    for (let i = 1; i < xs.length; i++) if (x <= xs[i])
+      return ys[i - 1] + (x - xs[i - 1]) * (ys[i] - ys[i - 1]) / (xs[i] - xs[i - 1]);
+    const n = xs.length - 1;
+    return ys[n] + (x - xs[n]) * (ys[n] - ys[n - 1]) / (xs[n] - xs[n - 1] || 1);
+  };
+  const outs = map.map((m) => m[0]), anims = map.map((m) => m[1]);
+  toAnim = (t) => interp(t, outs, anims);
+  const toOut = (a) => interp(a, anims, outs);
+  info.duration = toOut(info.duration);
+  info.sfx = (info.sfx || []).map((c) => Object.assign({}, c, { t: toOut(c.t) }));
   // images (logos, product shots) must be decoded before the first frame is captured
   await Promise.all([...root.querySelectorAll("img")].map((im) => im.decode().catch(() => {
     console.error("image failed to load: " + im.src); })));
-  return info || {};
+  return info;
 };
-window.__frame = async (t) => { await mod.frame(t); };
+let toAnim = (t) => t;
+window.__frame = async (t) => { await mod.frame(toAnim(t)); };
 window.__ready = true;
 </script>
 </body>

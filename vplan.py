@@ -420,6 +420,9 @@ def main():
     p.add_argument("-o", "--output", default="final.mp4")
     p.add_argument("--preset", default="medium")
     p.add_argument("--crf", type=int, default=19)
+    p.add_argument("--dry", action="store_true",
+                   help="resolve cuts and print every word's output time (for timing animations), no render")
+    p.add_argument("--draft", action="store_true", help="fast preview: half resolution, ultrafast encode")
     a = p.parse_args()
     with open(a.plan, encoding="utf-8") as f:
         plan = json.load(f)
@@ -478,6 +481,15 @@ def main():
             if c["s"] - 0.15 <= src_t <= c["e"] + 0.15:
                 return o + min(max(src_t, c["s"]), c["e"]) - c["s"]
         raise ValueError(f"source time {src_t} is not inside any clip")
+
+    if a.dry:
+        timeline = [{"w": w["w"], "out": round(w["s"], 2), "src": round(w["s"] - o + c["s"], 2), "clip": i + 1}
+                    for i, (c, o, ws) in enumerate(zip(clips, offsets, words_by_clip)) for w in ws]
+        with open(os.path.join(work, "timeline.json"), "w", encoding="utf-8") as f:
+            json.dump(timeline, f, ensure_ascii=False, indent=0)
+        print("\n".join(f"{x['out']:6.2f}  (src {x['src']:7.2f})  {x['w']}" for x in timeline))
+        print(f"total {total:.2f} s")
+        return
 
     faces = track_faces(src, meta, os.path.join(work, "faces.json" if src == plan["source"]
                                                  else f"faces_{os.path.basename(src)}.json"))
@@ -648,8 +660,11 @@ def main():
                      f"{t0 - 0.05 + dur:.3f})'[vf{k}]")
         vlast = f"vf{k}"
     # dialogue clean-up
-    graph.append("[dia]highpass=f=80,afftdn=nf=-30,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,"
-                  "asplit=2[diam][diak]")
+    # gentle: afftdn nf=-30 dulled the voice above 2.5 kHz (client: "she sounds weak"); a highpass takes
+    # the wind rumble, light tracking noise reduction the hiss, and a presence lift keeps her clear
+    graph.append(f"[dia]highpass=f=90,afftdn=nr={st.get('denoise_nr', 8)}:nf=-42:tn=1,"
+                 f"equalizer=f=250:t=q:w=1:g=-1.5,equalizer=f=3500:t=q:w=1.2:g={st.get('presence_db', 2.5)},"
+                 "acompressor=threshold=-20dB:ratio=3:attack=5:release=120,asplit=2[diam][diak]")
     mix = ["[diam]"]
     # music: sections of the track placed on the output timeline, ducked under speech
     mu = plan.get("music")
@@ -700,7 +715,7 @@ def main():
         if t0 < 0:
             trim, t0 = trim - t0, 0.0
         graph.append(f"[{n_in}:a]aresample=48000,atrim=start={trim:.3f}:duration={dur:.3f},asetpts=PTS-STARTPTS,"
-                     f"afade=t=out:st={max(0, dur - 0.15):.3f}:d=0.15,volume={fx.get('gain_db', -10):.1f}dB,"
+                     f"afade=t=out:st={max(0, dur - 0.15):.3f}:d=0.15,volume={fx.get('gain_db', -10) + st.get('sfx_gain_db', 0):.1f}dB,"
                      f"adelay={int(t0 * 1000)}:all=1[fx{k}]")
         mix.append(f"[fx{k}]")
         n_in += 1
@@ -710,13 +725,17 @@ def main():
         inputs += ["-i", c["file"]]
         graph.append(f"[{n_in}:a]aresample=48000,atrim=start={trim:.3f}:duration={c['dur']:.3f},"
                      f"asetpts=PTS-STARTPTS,afade=t=out:st={max(0, c['dur'] - 0.15):.3f}:d=0.15,"
-                     f"volume={c['gain_db']:.1f}dB,adelay={int(t0 * 1000)}:all=1[ax{k}]")
+                     f"volume={c['gain_db'] + st.get('sfx_gain_db', 0):.1f}dB,adelay={int(t0 * 1000)}:all=1[ax{k}]")
         mix.append(f"[ax{k}]")
         n_in += 1
     graph.append(f"{''.join(mix)}amix=inputs={len(mix)}:normalize=0:duration=first,"
                  f"loudnorm=I={st.get('lufs', -14)}:TP=-1.5:LRA=11,aresample=48000,"
                  # loudnorm alone let a Nomi render peak at 0.0 dBFS; a final limiter holds -1.5 dBFS
                  f"alimiter=limit=0.84:attack=2:release=50:level=false[aout]")
+    if a.draft:  # quick look: half resolution, fastest encode (~2x faster end to end)
+        graph.append(f"[{vlast}]scale=trunc(iw/4)*2:-2[vdraft]")
+        vlast = "vdraft"
+        a.preset, a.crf = "ultrafast", 26
     gpath = os.path.join(work, "plan_filter.txt")
     with open(gpath, "w", encoding="utf-8") as f:
         f.write(";\n".join(graph))

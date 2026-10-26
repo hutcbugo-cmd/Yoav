@@ -188,3 +188,12 @@ pop-up kind `anim` composites the animation and places the cues. First modules: 
 SmartphoneAppReveal (booking flow). Remotion was evaluated: same approach, but its licence needs a paid Company
 License above 3 employees. AI image/video APIs are not connected (no credentials, hosts blocked); costs are documented.
 Rule: never call procedural output "AI-generated".
+
+## Round 14 — Nomi v4 hook 1: animations on the key moments
+| Client note | Root cause | Fix | Result |
+|---|---|---|---|
+| Wind cleanup makes May sound weak | afftdn nf=−30 shaved −0.5 dB above 2.5 kHz; music and SFX crowd the voice | highpass 90 Hz + afftdn nr=8 nf=−42 with tracking, −1.5 dB @250 Hz, presence +2.5 dB @3.5 kHz (`denoise_nr`, `presence_db`); all SFX −3 dB (`sfx_gain_db`) | −14.0 LUFS, peak −1.2 dBFS |
+| Show the Nomi logo when she says "Nomi" | text-only logo pop-up | client icon in `assets/brands/nomi`; LogoReveal at all three "Nomi" (taglines "לעסקים", "הורידו עכשיו") | — |
+| More animations like the demos on key moments | — | 12 animation cues, each locked to a word with `_timemap`: nail paint, calendar X's, house, logo, phone booking flow (retimed to her sentence), chat photo, vibe switch, verified + stars, map, crossed-out icons, end logo | — |
+| How to make the tool faster | 4-core CPU, no GPU; whole-source levelling (once, ~12 min) | animation cache, 4 browser workers for HTML (1.4×), 3D supersample 1.25 (−30 %), `--dry` timing, `--draft` half-res preview (≈1.7× faster) | full 55 s hook re-render ≈2 min after the first |
+Rules: place overlays from QC frames, not from numbers. Taglines must clear the caption band (≈0.62 H), and nothing may cross the frame edge.

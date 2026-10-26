@@ -34,25 +34,36 @@ function serve() {
   const W = +opt.w, H = +opt.h, fps = +opt.fps;
   fs.mkdirSync(opt.out, { recursive: true });
   const srv = await serve();
-  const browser = await chromium.launch({
-    args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
-  page.on("console", (m) => { if (m.type() === "error") console.error("[page]", m.text()); });
-  page.on("pageerror", (e) => { console.error("[page]", e.message); process.exitCode = 1; });
-  await page.goto(`http://127.0.0.1:${srv.address().port}/vanim/stage.html?anim=${name}`);
-  await page.waitForFunction(() => window.__ready === true, null, { timeout: 30000 });
-  const info = await page.evaluate(([p, w, h]) => window.__setup(p, w, h), [JSON.parse(opt.params), W, H]);
+  // several browsers render interleaved frames in parallel (frames are pure functions of t).
+  // One browser per worker: pages of one browser share its single (CPU) GPU process.
+  const workers = Math.max(1, +(opt.workers || Math.min(4, require("os").cpus().length)));
+  const browsers = [];
+  const open = async () => {
+    const browser = await chromium.launch({
+      args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+    browsers.push(browser);
+    const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+    page.on("console", (m) => { if (m.type() === "error") console.error("[page]", m.text()); });
+    page.on("pageerror", (e) => { console.error("[page]", e.message); process.exitCode = 1; });
+    await page.goto(`http://127.0.0.1:${srv.address().port}/vanim/stage.html?anim=${name}`);
+    await page.waitForFunction(() => window.__ready === true, null, { timeout: 30000 });
+    const info = await page.evaluate(([p, w, h]) => window.__setup(p, w, h), [JSON.parse(opt.params), W, H]);
+    return { page, info, root: await page.$("#root") };
+  };
+  const t0 = Date.now();
+  const pages = await Promise.all(Array.from({ length: workers }, open));
+  const info = pages[0].info;
   const duration = info.duration;
   const n = Math.round(duration * fps);
-  const root = await page.$("#root");
-  const t0 = Date.now();
-  for (let i = 0; i < n; i++) {
-    await page.evaluate((t) => window.__frame(t), i / fps);
-    await root.screenshot({ path: path.join(opt.out, `f_${String(i).padStart(5, "0")}.png`), omitBackground: true });
-  }
+  await Promise.all(pages.map(async ({ page, root }, w) => {
+    for (let i = w; i < n; i += workers) {
+      await page.evaluate((t) => window.__frame(t), i / fps);
+      await root.screenshot({ path: path.join(opt.out, `f_${String(i).padStart(5, "0")}.png`), omitBackground: true });
+    }
+  }));
   fs.writeFileSync(path.join(opt.out, "info.json"),
                    JSON.stringify({ w: W, h: H, fps, n, duration, sfx: info.sfx || [] }, null, 1));
-  console.log(`${name}: ${n} frames ${W}x${H} in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
-  await browser.close();
+  console.log(`${name}: ${n} frames ${W}x${H} in ${((Date.now() - t0) / 1000).toFixed(1)} s (${workers} workers)`);
+  await Promise.all(browsers.map((b) => b.close()));
   srv.close();
 })();
