@@ -161,3 +161,13 @@ Plan: `examples/plan_nomi.example.json`.
 | "AI animations" | No GPU; open generative models are CPU-infeasible or non-commercial licensed | Procedural motion graphics instead (told the client plainly) | — |
 | Music weak, not enough sounds, not enough to keep watching | Music −12 dB with heavy ducking; SFX only on pop-ups | Music −7 dB, ducking ratio 3; whoosh on every real cut, impacts/clicks/pops per animation (27 SFX); spoken-word pop 108 %; 3 % drift on every shot; business section gets a text list | — |
 Rules: text-only pop-ups for this client (emoji may sit inside a text pill); measure framing on the rendered output, not just the plan.
+
+## Round 12 — Nomi v3 hook 1 (client: frame feels crooked, she isn't really centred; plain white captions)
+
+| Client note | Root cause (measured) | Fix in the pipeline | Result |
+|---|---|---|---|
+| Frame feels crooked | Camera roll ≈ 2° (lamp posts 1.8–2.9°, horizon ≈ 1.6°); automatic Hough/grass-line detection failed (few straight lines in a park), verified by eye against guide lines | `framing.roll_deg`: levelled working copy (`rotate` + scale by cos a + (max/min)·sin a + crop) made once in `normalize_source` | Lamp post vertical in the output |
+| She isn't really in the middle | Crop centred on the face, but the torso sits ≈ 0.13 of the frame width right of the face, so the person as a whole looked off-centre | `body_offset` (PP-HumanSeg torso mask, cached) + `framing.body_weight` blends face and body centres | Face + body centred in preview frames |
+| No "?" after "תיק העבודות שלה" | ASR punctuation | review `fix` "שלה?"→"שלה" | — |
+| White captions, no stroke, no pink | Style choice | `caption_mode: "plain"`: white, no outline, soft shadow, no word fill, no pop-in | — |
+Rule: check the roll on every new camera setup (vertical lines against a guide) before framing.

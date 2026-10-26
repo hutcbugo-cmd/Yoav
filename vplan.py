@@ -51,6 +51,43 @@ def track_faces(src, meta, cache, fps=4):
     return out
 
 
+SEG_MODEL = os.path.join(HERE, "assets/models/human_segmentation_pphumanseg_2023mar.onnx")
+
+
+def body_offset(src, meta, s, e, faces, cache):
+    """Median horizontal offset of the torso (person mask, neck to hips) from the face
+    centre within a clip, from three sampled frames (OpenCV PP-HumanSeg, Apache-2.0)."""
+    import cv2
+    store = json.load(open(cache)) if os.path.exists(cache) else {}
+    key = f"{os.path.basename(src)}:{s:.3f}-{e:.3f}"
+    if key in store:
+        return store[key]
+    net = cv2.dnn.readNet(SEG_MODEL)
+    offs = []
+    for t in np.linspace(s + 0.1, max(s + 0.1, e - 0.1), 3):
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{t:.3f}", "-i", src, "-frames:v", "1", "-vf", "scale=360:640",
+                              "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True).stdout
+        if len(raw) < 360 * 640 * 3:
+            continue
+        img = np.frombuffer(raw, np.uint8).reshape(640, 360, 3)
+        blob = ((cv2.resize(img, (192, 192)).astype(np.float32) / 255.0 - 0.5) / 0.5).transpose(2, 0, 1)[None]
+        net.setInput(blob)
+        out = net.forward()[0]
+        mask = cv2.resize((out[1] > out[0]).astype(np.uint8), (360, 640))
+        near = [f for f in faces if abs(f[0] - t) <= 0.5]
+        if not near:
+            continue
+        _, fcx, ftop, fh = min(near, key=lambda f: abs(f[0] - t))
+        y0, y1 = int((ftop + fh) * 640), int(min(1.0, ftop + fh * 4) * 640)
+        xs = np.nonzero(mask[y0:y1])[1]
+        if len(xs):
+            offs.append(xs.mean() / 360 - fcx)
+    val = float(np.median(offs)) if offs else 0.0
+    store[key] = val
+    json.dump(store, open(cache, "w"))
+    return val
+
+
 def face_track_expr(faces, s, e, fallback):
     """Piecewise-linear ffmpeg expression of the smoothed face x-centre over clip time t."""
     pts = [(f[0] - s, f[1]) for f in faces if s - 0.3 <= f[0] <= e + 0.3]
@@ -261,6 +298,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     mode = st.get("caption_mode", "boxed")
     clean_mode = mode == "clean"
+    if mode == "plain":  # white, no stroke, no highlight: a soft drop shadow only (client reference)
+        head = head.replace(
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,{box},&H64000000,0,0,0,0,100,100,0,0,3,{round(fs * 0.22)},0,5,80,80,0,-1",
+            f"Style: Cap,{st['font']},{fs},&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,0,0,0,0,100,100,0,0,1,"
+            f"0,{max(2, round(fs * 0.05))},5,90,90,0,-1")
+        hi_on = hi_off = ""
     if mode == "fill":
         # white words with a solid black stroke; the spoken word's fill turns the accent colour
         ob = max(2, round(fs * st.get("stroke", 0.06)))
@@ -322,12 +365,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 e = c[i + 1]["s"] if i + 1 < len(c) else end
                 if e - s < 0.02:
                     continue
-                if mode == "fill":
+                if mode == "plain":
+                    if i:  # one event per caption chunk; no per-word change
+                        continue
+                    e = end
+                    txt = r"{\blur2}" + " ".join(clean)
+                elif mode == "fill":
                     txt = " ".join((hi_on + t + hi_off) if j == i else t for j, t in enumerate(clean))
                 else:
                     txt = " ".join((r"{\c" + hi + "}" + t + r"{\c&H00FFFFFF&}") if j == i else t
                                    for j, t in enumerate(clean))
-                pop = r"{\fscx88\fscy88\t(0,90,\fscx100\fscy100)}" if i == 0 else ""
+                pop = r"{\fscx88\fscy88\t(0,90,\fscx100\fscy100)}" if i == 0 and mode != "plain" else ""
                 lines.append(f"Dialogue: 0,{vedit.ass_time(s)},{vedit.ass_time(e)},Cap,,0,0,0,,"
                              f"{{\\an5\\pos({W // 2},{y})}}{pop}{txt}")
     # force a right-to-left base direction: libass takes it from the first strong
@@ -357,7 +405,7 @@ def main():
     with open(a.plan, encoding="utf-8") as f:
         plan = json.load(f)
     work = plan["work"]
-    src = normalize_source(plan["source"], work)
+    src = normalize_source(plan["source"], work, plan.get("framing", {}).get("roll_deg", 0.0))
     meta = vedit.probe(src)
     W, H = (meta["w"] // 2) * 2, (meta["h"] // 2) * 2
     st = plan["style"]
@@ -412,7 +460,9 @@ def main():
                 return o + min(max(src_t, c["s"]), c["e"]) - c["s"]
         raise ValueError(f"source time {src_t} is not inside any clip")
 
-    faces = track_faces(src, meta, os.path.join(work, "faces.json"))
+    faces = track_faces(src, meta, os.path.join(work, "faces.json" if src == plan["source"]
+                                                 else f"faces_{os.path.basename(src)}.json"))
+    body_w = plan.get("framing", {}).get("body_weight", 0.0)
 
     # one input per clip, opened with an accurate seek: a single input split into N trim
     # branches buffered frames across branches and was OOM-killed on a 7-minute source
@@ -440,6 +490,9 @@ def main():
         # punch-in grows around her face instead of around the top of the frame
         cx_expr = face_track_expr(faces, c["s"], c["e"], fc["cx"]) if plan.get("framing", {}).get("track", True) \
             else f"{fc['cx']:.4f}"
+        if body_w:  # a leaning presenter: centre between face and torso, not on the face alone
+            off = body_offset(src, meta, c["s"], c["e"], faces, os.path.join(work, "body_offsets.json"))
+            cx_expr = f"({cx_expr})+{body_w * off:.4f}"
         face_cy = fc["top"] + fc["h"] / 2
         target_cy = plan.get("framing", {}).get("face_center_y", face_top + fc["h"] * base / 2)
         # positions come from the zoom expression itself, not iw/ih: crop keeps the frame
@@ -654,7 +707,7 @@ def place_clear_of_face(src_t, py, ph, pw, clips, faces, base, face_top, W, H, s
     return round(max(half + 0.02, ftop - margin - half) * H) if ftop - margin - half > half else py
 
 
-def normalize_source(src, work):
+def normalize_source(src, work, roll=0.0):
     """Phone footage (iPhone: HEVC 10-bit HLG/HDR, rotation flag, extra data tracks) is
     converted once to an 8-bit SDR H.264 working copy. Rendering straight from it used
     ~14 GB of RAM (OOM-killed) and the HDR colours came out washed-out grey."""
@@ -662,13 +715,19 @@ def normalize_source(src, work):
                                       "-show_streams", src], capture_output=True, text=True, check=True).stdout)
     v = info["streams"][0]
     hdr = v.get("color_transfer") in ("arib-std-b67", "smpte2084")
-    if not hdr and v.get("codec_name") == "h264" and v.get("pix_fmt") == "yuv420p":
+    if not hdr and not roll and v.get("codec_name") == "h264" and v.get("pix_fmt") == "yuv420p":
         return src
-    out = os.path.join(work, "source_sdr.mp4")
+    out = os.path.join(work, f"source_sdr{'_roll%+.2f' % roll if roll else ''}.mp4")
     if os.path.exists(out) and os.path.getmtime(out) > os.path.getmtime(src):
         return out
     vf = ("zscale=t=linear:npl=203,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=mobius:desat=0,"
           "zscale=t=bt709:m=bt709:r=tv,format=yuv420p") if hdr else "format=yuv420p"
+    if roll:  # level a tilted camera (measured on posts / horizon); scale just enough to hide corners
+        a = np.radians(abs(roll))
+        w0, h0 = int(v["width"]), int(v["height"])
+        k = np.cos(a) + max(w0, h0) / min(w0, h0) * np.sin(a)
+        vf += (f",rotate={np.radians(roll):.5f}:ow=iw:oh=ih,scale=2*trunc(iw*{k:.4f}/2):2*trunc(ih*{k:.4f}/2),"
+               f"crop={w0}:{h0},format=yuv420p")
     print(f"normalizing source ({v.get('codec_name')} {v.get('pix_fmt')}{', HDR tone-mapped' if hdr else ''})")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", src, "-map", "0:v:0", "-map", "0:a:0", "-vf", vf,
                     "-c:v", "libx264", "-preset", "fast", "-crf", "14", "-c:a", "pcm_s16le", out], check=True)
