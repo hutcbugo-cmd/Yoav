@@ -318,3 +318,13 @@ Client: "exactly a video like this, landscape, our logo, colours and story, a pl
   glides on each VO line with motion blur, 2-line text pulls focus, brand flood end card. 1920×1080, 30 fps.
 - Mix: VO −18 LUFS per line, Mixkit "Fashion" ducked under the VO with its drop on "תכירי את נומי", SFX from the
   animation cues, −14.3 LUFS, −2.7 dBTP. Scripts: `examples/explainer/`.
+
+## Nomi 9:16 fast-cut ad (reference 4, "Agent for All")
+- Brief: "something like this ad for Nomi, ~30 s", for free: no filming, no recording, no paid generation.
+- Reference (51 s, screen recording): AI-generated presenter + realistic still-life b-roll, one shot per task
+  (~1.5 s), 2–3 word captions with one highlighted word, a headline over the hook, UI screens, a recap
+  checklist, and an end card with a CTA. Without a generative video API the realistic footage can't be made
+  here, so every shot is drawn (`vanim/lib/NomiAd.js`): warm daylight table sets (blind shadows, grain,
+  vignette), punch-in on every cut, white flash on the brand reveal.
+- VO: the client's ElevenLabs take (explainer script, 23 s). Shots and captions sit on Whisper word times
+  (`examples/ad30/plan.json`, Whisper writes "נעמי" → captions say "נומי"). Build: `examples/ad30/make_nomi_ad.py VO OUT [--draft]`.
